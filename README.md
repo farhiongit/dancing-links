@@ -1,5 +1,5 @@
 # dancing-links
-An implementation of Knuth's dancing linjs algorithm for exact cover search.
+An implementation of Knuth's dancing links algorithm for exact cover search.
 
 Dancing links, Donald E. Knuth, Submitted on 15 Nov 2000 (see  http://en.wikipedia.org/wiki/Dancing_Links,
 http://arxiv.org/abs/cs/0011047 and https://arxiv.org/pdf/cs/0011047v1.pdf).
