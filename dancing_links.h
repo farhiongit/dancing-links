@@ -13,15 +13,18 @@
 typedef struct univers *Univers;
 
 /// Solution displayer signature
+/// @param [in] univers Univers
+/// @param [in] length Number of subseets in the solution
+/// @param [in] solution List of the \p length names of the subsets in the solution.
 typedef void (*dlx_solution_displayer) (Univers univers, unsigned long length, const char *const *solution);
 
 /// Setter of solution displayer.
-/// @param [in] msd Solution displayer to set.
-/// @return Previous solution displayer.
+/// @param [in] displayer Solution displayer to set.
+/// @return Solution displayer set by the previous call to dlx_displayer_set() (or \p NULL on first call).
 ///
-/// This function \p msd is called each time a solution is found.
-/// If \p msd is set to 0, solutions are displayed on standard terminal output.
-dlx_solution_displayer dlx_displayer_set (dlx_solution_displayer msd);
+/// The function pointed to by \p displayer passed as an argument is called by dlx_exact_cover_search() every time a solution is found.
+/// If function pointer \p NULL is passed as an argument, solutions are displayed on standard terminal output.
+dlx_solution_displayer dlx_displayer_set (dlx_solution_displayer displayer);
 
 /// Initializes a new univers.
 /// @param [in] list_of_elements List of elements of the univers, separated by separators.
@@ -77,6 +80,15 @@ int dlx_subset_require_in_solution (Univers univers, const char *subset_name);
 /// @param [in] univers Univers
 /// @param [in] one_only If set, searches for the first solution only.
 /// @return Number of solutions found.
+///
+/// Every time (or only the first time if \p one_only is set) a solution is found,
+/// the function \p displayer declared by a previous call to dlx_displayer_set(dlx_solution_displayer displayer) is called with three arguments:
+/// - the identifier of the univers \p univers, 
+/// - the number of subsets included in the solution,
+/// - the list of the names of the subsets included in the solution.
+///
+/// If dlx_displayer_set() was not called or was called with an argument equal to 0, solutions are displayed on standard terminal output.
+///
 unsigned long dlx_exact_cover_search (Univers univers, int one_only);
 
 /// Releases data used by the univers.

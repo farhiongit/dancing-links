@@ -212,9 +212,9 @@ dlx_element_uncover (struct element *elementInUnivers)
 
 /// Displays a solution.
 /// @param [in] univers Univers
-/// @param [in] solutions Solution to be dispplayed.
+/// @param [in] solutions Solutions to be dispplayed. Each solution is a list of elements.
 static void
-dlx_univers_display_solution (Univers univers, struct element **solutions)
+dlx_univers_display_solutions (Univers univers, struct element **solutions)
 {
   unsigned long length = univers->solution_length - univers->head->size;
 
@@ -275,7 +275,7 @@ dlx_univers_search (Univers univers, struct element **solutions, unsigned long k
   // We have found a solution that we can display.
   if (univers->head->nextElement == univers->head)
   {
-    dlx_univers_display_solution (univers, solutions);
+    dlx_univers_display_solutions (univers, solutions);
     return 1;
   }
 

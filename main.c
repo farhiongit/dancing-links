@@ -1,5 +1,15 @@
+#include <stdio.h>
 #include <string.h>
 #include "dancing_links.h"
+
+static void
+my_dlx_solution_displayer (Univers univers, unsigned long length, const char *const *solution)
+{
+	printf ("\n---\nUnivers %p\nSolution: %lu elements\n", (void *)univers, length);
+	for (unsigned long i = 0 ; i < length ; i++)
+	  printf ("'%s' ; ", solution[i]);
+	printf ("\n---\n");
+}
 
 int
 main (void)
@@ -96,6 +106,9 @@ main (void)
 
   dlx_univers_destroy (sudoku);
 
+  // Set solution displayer.
+  dlx_displayer_set (my_dlx_solution_displayer);
+
   //Test 2
   Univers m = dlx_univers_create ("A;B;C;D;E;F;G");
 
@@ -113,6 +126,9 @@ main (void)
   dlx_exact_cover_search (m, 0);
 
   dlx_univers_destroy (m);
+
+  // Unset solution displayer.
+  dlx_displayer_set (0);
 
   //Test 3
   m = dlx_univers_create ("A;A;B;A");
