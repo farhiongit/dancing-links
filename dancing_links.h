@@ -58,22 +58,10 @@ int dlx_subset_define (Univers univers, const char *subset_name, const char *lis
 int dlx_subset_define (Univers univers, const char *subset_name, unsigned long nb_elements, const char *some_elements[])
   __attribute__ ((overloadable));
 
-/// Requires that the subset which name is 'subset_name' be included in any solution.
+/// Requires that a subset be included in any solution.
 /// @param [in] univers Univers
 /// @param [in] subset_name Name of the required subset
 /// @return 1 if sucessful, 0 otherwise
-///
-/// The selected subset conforms to theses conditions:
-/// - subset name is 'subset_name'
-/// - subset was not previously required in the solution
-///
-/// In case of several candidate subsets (with the same name), a subset is chosen arbitrarily
-/// (the subset with an element in the first element, in order of addded element to the univers,
-/// then the first subset, in order of added subsets to the univers)
-///
-/// Removes the elements contained in the required subset
-/// and all the subsets which contain these elements, the required subset included.
-///
 int dlx_subset_require_in_solution (Univers univers, const char *subset_name);
 
 /// Searches for all exact cover solutions.

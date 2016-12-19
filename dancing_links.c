@@ -81,6 +81,8 @@ struct element
 };
 
 /// The Univers object.
+///
+/// Links to the first element of the univers (head), the solutions found, as well as subsets required in solutions.
 struct univers
 {
   struct element *head;         ///< The pointer to the head element that references elements and subsets.
@@ -581,6 +583,9 @@ dlx_subset_require_in_solution (Univers univers, const char *subset_name)
   DLX_PRINT ("Subset required in any solution:\n");
   DLX_PRINT ("  [%lu]\tSubset %s:", univers->solution_length - univers->head->size + 1, subset_name);
 
+  // In case of several candidate subsets (with the same name), a subset is chosen arbitrarily
+  // (the subset with an element in the first element, in order of addded element to the univers,
+  // then the first subset, in order of added subsets to the univers)
   for (struct element * elementInUnivers = univers->head->nextElement; elementInUnivers != univers->head;
        elementInUnivers = elementInUnivers->nextElement)
     // Look for the first element of the subset 'subset_name' (in order of creation in univers).
@@ -589,8 +594,13 @@ dlx_subset_require_in_solution (Univers univers, const char *subset_name)
          elementInSubset = elementInSubset->elementInNextSubsetContainingThisElementOfUnivers)
       if (!strcmp (elementInSubset->name, subset_name))
       {
+        // The selected subset conforms to theses conditions:
+        // - subset name is 'subset_name'
+        // - subset was not previously required in the solution
         struct element *j = elementInSubset;
 
+        // Removes the elements contained in the required subset
+        // and all the subsets which contain these elements, the required subset included.
         do
         {
           DLX_PRINT (" %s", j->elementInUnivers->name); // Name of the element.
