@@ -110,6 +110,30 @@ test_sudoku (void)
   dlx_univers_destroy (sudoku);
 }
 
+/// Pentomino unit test.
+/// - F, L, N, P, and Y can be oriented in 8 ways: 4 by rotation, and 4 more for the mirror image.
+///   Their symmetry group consists only of the identity mapping.
+/// - T, and U can be oriented in 4 ways by rotation.
+///   They have an axis of reflection aligned with the gridlines.
+///   Their symmetry group has two elements, the identity and the reflection in a line parallel to the sides of the squares.
+/// - V and W also can be oriented in 4 ways by rotation.
+///   They have an axis of reflection symmetry at 45° to the gridlines.
+///   Their symmetry group has two elements, the identity and a diagonal reflection.
+/// - Z can be oriented in 4 ways: 2 by rotation, and 2 more for the mirror image.
+///   It has point symmetry, also known as rotational symmetry of order 2.
+///   Its symmetry group has two elements, the identity and the 180° rotation.
+/// - I can be oriented in 2 ways by rotation.
+///   It has two axes of reflection symmetry, both aligned with the gridlines.
+///   Its symmetry group has four elements, the identity, two reflections and the 180° rotation.
+///   It is the dihedral group of order 2, also known as the Klein four-group.
+/// - X can be oriented in only one way.
+///   It has four axes of reflection symmetry, aligned with the gridlines and the diagonals, and rotational symmetry of order 4.
+///   Its symmetry group, the dihedral group of order 4, has eight elements.
+///
+/// The F, L, N, P, Y, and Z pentominoes are chiral; adding their reflections (F', J, N', Q, Y', S) brings the number of one-sided pentominoes to 18.
+/// If rotations are also considered distinct, then the pentominoes from the first category count eightfold, the ones from the next three categories (T, U, V, W, Z) count fourfold, I counts twice, and X counts only once. This results in 5×8 + 5×4 + 2 + 1 = 63 fixed pentominoes.
+/// The 8×8 rectangle with a 2×2 hole in the center, was solved by Dana Scott as far back as 1958, and has 65 solutions.
+/// @see https://en.wikipedia.org/wiki/Pentomino
 static void
 test_pentomino (void)
 {
@@ -121,7 +145,7 @@ test_pentomino (void)
     {
       int x, y;
     } cell;
-  } grid[60] =
+  } grid[] =
   {
     {"11", {0, 0}}, {"12", {0, 1}}, {"13", {0, 2}}, {"14", {0, 3}}, {"15", {0, 4}}, {"16", {0, 5}}, {"17", {0, 6}}, {"18", {0, 7}},
     {"21", {1, 0}}, {"22", {1, 1}}, {"23", {1, 2}}, {"24", {1, 3}}, {"25", {1, 4}}, {"26", {1, 5}}, {"27", {1, 6}}, {"28", {1, 7}},
@@ -140,20 +164,22 @@ test_pentomino (void)
     {
       int x, y;
     } tile[5];
-  } pentomino[12] =
+    int rotation;
+    int chirality;
+  } pentomino[] =
   {
-    {"I", {{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}}},  // I  11  12  13  14  15
-    {"N", {{0, 0}, {1, 0}, {1, 1}, {2, 1}, {3, 1}}},  // N  16  26  27  37  47
-    {"L", {{0, 0}, {0, 1}, {1, 1}, {2, 1}, {3, 1}}},  // L  17  18  28  38  48
-    {"U", {{0, 0}, {0, 1}, {1, 0}, {2, 0}, {2, 1}}},  // U  21  22  31  41  42
-    {"X", {{0, 0}, {1,-1}, {1, 0}, {1, 1}, {2, 0}}},  // X  23  32  33  34  43
-    {"W", {{0, 0}, {0, 1}, {1, 1}, {1, 2}, {2, 2}}},  // W  24  25  35  36  46
-    {"P", {{0, 0}, {0, 1}, {0, 2}, {1, 1}, {1, 2}}},  // P  51  52  53  62  63
-    {"F", {{0, 0}, {1,-2}, {1,-1}, {1, 0}, {2,-1}}},  // F  56  64  65  66  75
-    {"Z", {{0, 0}, {0, 1}, {1, 0}, {2,-1}, {2, 0}}},  // Z  57  58  67  76  77
-    {"T", {{0, 0}, {1, 0}, {1, 1}, {1, 2}, {2, 0}}},  // T  61  71  72  73  81
-    {"V", {{0, 0}, {1, 0}, {2,-2}, {2,-1}, {2, 0}}},  // V  68  78  86  87  88
-    {"Y", {{0, 0}, {1,-2}, {1,-1}, {1, 0}, {1, 1}}},  // Y  74  82  83  84  85
+    {"I", {{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}}, 2, 0},  // I  11  12  13  14  15
+    {"N", {{0, 0}, {1, 0}, {1, 1}, {2, 1}, {3, 1}}, 4, 1},  // N  16  26  27  37  47, chiral
+    {"L", {{0, 0}, {0, 1}, {1, 1}, {2, 1}, {3, 1}}, 4, 1},  // L  17  18  28  38  48, chiral
+    {"U", {{0, 0}, {0, 1}, {1, 0}, {2, 0}, {2, 1}}, 4, 0},  // U  21  22  31  41  42
+    {"X", {{0, 0}, {1,-1}, {1, 0}, {1, 1}, {2, 0}}, 1, 0},  // X  23  32  33  34  43
+    {"W", {{0, 0}, {0, 1}, {1, 1}, {1, 2}, {2, 2}}, 4, 0},  // W  24  25  35  36  46
+    {"P", {{0, 0}, {0, 1}, {0, 2}, {1, 1}, {1, 2}}, 4, 1},  // P  51  52  53  62  63, chiral
+    {"F", {{0, 0}, {1,-2}, {1,-1}, {1, 0}, {2,-1}}, 4, 1},  // F  56  64  65  66  75, chiral
+    {"Z", {{0, 0}, {0, 1}, {1, 0}, {2,-1}, {2, 0}}, 2, 1},  // Z  57  58  67  76  77, chiral
+    {"T", {{0, 0}, {1, 0}, {1, 1}, {1, 2}, {2, 0}}, 4, 0},  // T  61  71  72  73  81
+    {"V", {{0, 0}, {1, 0}, {2,-2}, {2,-1}, {2, 0}}, 4, 0},  // V  68  78  86  87  88
+    {"Y", {{0, 0}, {1,-2}, {1,-1}, {1, 0}, {1, 1}}, /*4, 1*/ 1, 0 /* breaking symetry */},  // Y  74  82  83  84  85, chiral
   };
 /* *INDENT-ON* */
 
@@ -169,61 +195,76 @@ test_pentomino (void)
   Univers univers = dlx_univers_create (sizeof (columns) / sizeof (*columns), (const char **) columns);
 
   // Initialize subsets
+  int nb_subsets = 0;
   char *subset[1 + sizeof (pentomino[0].tile) / sizeof (*pentomino[0].tile)];
 
+  int nb_fixed_pentominoes = 0;
   for (int pento = 0; pento < sizeof (pentomino) / sizeof (*pentomino); pento++)
   {
     subset[0] = pentomino[pento].name;
-    for (int rotation = 0; rotation < 4; rotation++)
+    for (int chirality = 1; chirality >= -1; chirality -= 2)
     {
-      for (int cell = 0; cell < sizeof (grid) / sizeof (*grid); cell++)
+      for (int rotation = 0; rotation < pentomino[pento].rotation; rotation++)
       {
-        int invalid_subset = 0;
-
-        for (int tile = 0; tile < sizeof (pentomino[pento].tile) / sizeof (*pentomino[pento].tile); tile++)
+        for (int cell = 0; cell < sizeof (grid) / sizeof (*grid); cell++)
         {
-          int I = grid[cell].cell.x;
-          int J = grid[cell].cell.y;
+          int invalid_subset = 0;
 
-          switch (rotation)
+          for (int tile = 0; tile < sizeof (pentomino[pento].tile) / sizeof (*pentomino[pento].tile); tile++)
           {
-            case 0:
-              I += pentomino[pento].tile[tile].x;
-              J += pentomino[pento].tile[tile].y;
-              break;
-            case 1:
-              I += pentomino[pento].tile[tile].y;
-              J -= pentomino[pento].tile[tile].x;
-              break;
-            case 2:
-              I -= pentomino[pento].tile[tile].x;
-              J -= pentomino[pento].tile[tile].y;
-              break;
-            case 3:
-              I -= pentomino[pento].tile[tile].y;
-              J += pentomino[pento].tile[tile].x;
-              break;
-          }
+            int I = grid[cell].cell.x;
+            int J = grid[cell].cell.y;
 
-          subset[1 + tile] = 0;
-          for (int other_cell = 0; other_cell < sizeof (grid) / sizeof (*grid); other_cell++)
-            if (grid[other_cell].cell.x == I && grid[other_cell].cell.y == J)
-              subset[1 + tile] = grid[other_cell].name;
+            switch (rotation)
+            {
+              case 0:
+                I += pentomino[pento].tile[tile].x * chirality;
+                J += pentomino[pento].tile[tile].y;
+                break;
+              case 1:
+                I += pentomino[pento].tile[tile].y;
+                J -= pentomino[pento].tile[tile].x * chirality;
+                break;
+              case 2:
+                I -= pentomino[pento].tile[tile].x * chirality;
+                J -= pentomino[pento].tile[tile].y;
+                break;
+              case 3:
+                I -= pentomino[pento].tile[tile].y;
+                J += pentomino[pento].tile[tile].x * chirality;
+                break;
+            }
 
-          if (subset[1 + tile] == 0)
+            subset[1 + tile] = 0;
+            for (int other_cell = 0; other_cell < sizeof (grid) / sizeof (*grid); other_cell++)
+              if (grid[other_cell].cell.x == I && grid[other_cell].cell.y == J)
+              {
+                subset[1 + tile] = grid[other_cell].name;
+                break;
+              }
+
+            if (subset[1 + tile] == 0)
+            {
+              invalid_subset = 1;
+              break;
+            }
+          }                     // for tile
+
+          if (!invalid_subset)
           {
-            invalid_subset = 1;
-            break;
-          }
-        }                       // for tile
-        if (!invalid_subset)
-          dlx_subset_define (univers, "", sizeof (subset) / sizeof (*subset), (const char **) subset);
-      }                         // for cell
+            dlx_subset_define (univers, "", sizeof (subset) / sizeof (*subset), (const char **) subset);
+            nb_subsets++;
+		  }
+        }                       // for cell
+        nb_fixed_pentominoes++;
+      }                         // for rotation
 
-      if (pento == 0)
-        continue;
-    }                           // for rotation
+      if (!pentomino[pento].chirality)
+        break;
+    }                           // for chirality
   }                             // for pento
+  fprintf (stderr, "%i fixed pentominoes.\n", nb_fixed_pentominoes);
+  fprintf (stderr, "%i subsets defined.\n", nb_subsets);
 
   dlx_exact_cover_search (univers, 0);
 

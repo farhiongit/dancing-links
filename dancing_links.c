@@ -36,7 +36,7 @@
 
 /// Display to terminal standard output if \p dlx_displayer is not set
 #define DLX_PRINT(...) \
-do { if (!dlx_displayer) printf (__VA_ARGS__); } while (0)
+do { fprintf (stderr, __VA_ARGS__); } while (0)
 
 /// Call the callback function \p dlx_displayer if set.
 #define DLX_DISPLAY_SOLUTION(univers, length, solution) \
