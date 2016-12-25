@@ -70,7 +70,7 @@ static const char *ELEMENT_SEPARATOR = ",;:|";
 struct element
 {
   char *name;                   ///< Name of the head ("|HEAD|"), of the element of the univers, or of the subset containing the element of a subset.
-  unsigned long int size;       ///< Number of subset (head) or of subsets containing an element of the univers. Left undefined for elements of subsets.
+  unsigned long int size;       ///< Number of subsets (for head) or of subsets containing an element of the univers. Left undefined for elements of subsets.
 
   struct element *previousElement;      ///< Link to the previous element in univers or in the subset.
   struct element *nextElement;  ///< Link to the previous element in univers or in the subset.
@@ -508,7 +508,7 @@ __attribute__ ((overloadable))
     }
   }
 
-  if (first_element)            // At least one element was added tp the subset
+  if (first_element)            // At least one element was added to the subset
   {
     univers->head->size++;      // Number of subsets
 
