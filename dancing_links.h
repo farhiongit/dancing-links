@@ -12,6 +12,10 @@
 /// Objet Univers
 typedef struct univers *Univers;
 
+/// Flag to trace execution on standard error terminal.
+/// Trace if set, keep quiet otherwise (default).
+extern int dlx_trace;
+
 /// Solution displayer signature
 /// @param [in] univers Univers
 /// @param [in] length Number of subseets in the solution

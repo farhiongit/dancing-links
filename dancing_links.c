@@ -34,9 +34,11 @@
 /// If set, the non-determistic choice (by \p dlx_univers_choose_element) of column is optimized heuristically.
 #define OPTIMIZE_CHOICE 1
 
-/// Display to terminal standard output if \p dlx_displayer is not set
+int dlx_trace = 0;
+
+/// Display to terminal standard error if \p dlx_trace is set.
 #define DLX_PRINT(...) \
-do { fprintf (stderr, __VA_ARGS__); } while (0)
+do { if (dlx_trace) fprintf (stderr, __VA_ARGS__); } while (0)
 
 /// Call the callback function \p dlx_displayer if set.
 #define DLX_DISPLAY_SOLUTION(univers, length, solution) \
@@ -189,7 +191,7 @@ dlx_element_cover (struct element *elementInUnivers)
         j->elementInPreviousSubsetContainingThisElementOfUnivers;
       j->elementInPreviousSubsetContainingThisElementOfUnivers->elementInNextSubsetContainingThisElementOfUnivers =
         j->elementInNextSubsetContainingThisElementOfUnivers;
-      j->elementInUnivers->size--;      // The number of subsets including this element is decremented.
+      j->elementInUnivers->size--;      // The number of subsets containing this element is decremented.
     }
 }
 
@@ -203,7 +205,7 @@ dlx_element_uncover (struct element *elementInUnivers)
        i != elementInUnivers; i = i->elementInPreviousSubsetContainingThisElementOfUnivers)
     for (struct element * j = i->previousElement; j != i; j = j->previousElement)
     {
-      j->elementInUnivers->size++;      // The number of subsets including this element is incremented.
+      j->elementInUnivers->size++;      // The number of subsets containing this element is incremented.
       j->elementInPreviousSubsetContainingThisElementOfUnivers->elementInNextSubsetContainingThisElementOfUnivers = j;
       j->elementInNextSubsetContainingThisElementOfUnivers->elementInPreviousSubsetContainingThisElementOfUnivers = j;
     }
@@ -310,8 +312,8 @@ dlx_univers_search (Univers univers, struct element **solutions, unsigned long k
       // We won't have to search for a valid element in these columns containing j.
       // We can therefore remove these columns from the matrix.
 
-      // Furthermore, the solution can not include other subsets that
-      // contains the same elements, otherwise,
+      // Furthermore, the solution can not contain other subsets that
+      // contain the same elements, otherwise,
       // there would be more than one subset containig the same element in the solution.
       // Thus, elements in those other subsets can be removed from the univers.
       dlx_element_cover (j->elementInUnivers);
@@ -483,7 +485,7 @@ __attribute__ ((overloadable))
 
     elementInSubset->name = strdup (subset_name);
     elementInSubset->elementInUnivers = elementInUnivers;
-    elementInUnivers->size++;   // Number of subsets including the element is incremented
+    elementInUnivers->size++;   // Number of subsets containing the element is incremented
 
     /// The element of the univers and subsets containing this element of the univers are doubly linked as circular lists (\p elementInPreviousSubsetContainingThisElementOfUnivers and \p elementInNextSubsetContainingThisElementOfUnivers).
     elementInSubset->elementInNextSubsetContainingThisElementOfUnivers = elementInUnivers;
@@ -609,8 +611,8 @@ dlx_subset_require_in_solution (Univers univers, const char *subset_name)
           // de facto included in the solution.
           // We can therefore remove these elements from the univers.
 
-          // Furthermore, the solution can not include subsets that
-          // contains this element, otherwise,
+          // Furthermore, the solution can not contain subsets that
+          // contain this element, otherwise,
           // there would be more than one subset containing this element in the solution.
           // Thus, those elements can be removed from the univers.
 

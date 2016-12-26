@@ -375,6 +375,8 @@ various_tests (void)
 int
 main (void)
 {
+  dlx_trace = 1;
+
   test_sudoku ();
 
   various_tests ();
