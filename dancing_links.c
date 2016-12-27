@@ -42,7 +42,7 @@ do { if (dlx_trace) fprintf (stderr, __VA_ARGS__); } while (0)
 
 /// Call the callback function \p dlx_displayer if set.
 #define DLX_DISPLAY_SOLUTION(univers, length, solution) \
-do { if (dlx_displayer) dlx_displayer (univers, length, solution); } while (0)
+do { if (univers->solution_displayer) univers->solution_displayer (univers, length, solution, univers->solution_displayer_data); } while (0)
 
 /// Allowed separators for lists of names of elements.
 static const char *ELEMENT_SEPARATOR = ",;:|";
@@ -94,10 +94,11 @@ struct univers
 
   struct element **uncover_column;      ///< List of subsets required in solutions (an element of this subset.)
   unsigned long uncover_column_length;  ///< Number of subsets required in solutions. 
-};
 
-/// Callback function to display a solution
-static dlx_solution_displayer dlx_displayer = 0;
+  dlx_solution_displayer solution_displayer;    ///< Callback function to display a solution
+
+  void *solution_displayer_data;        ///< Data usable for callback function to display a solution
+};
 
 /// Gets an element by its name.
 /// @param [in] head Univers head
@@ -339,11 +340,12 @@ dlx_univers_search (Univers univers, struct element **solutions, unsigned long k
 }
 
 dlx_solution_displayer
-dlx_displayer_set (dlx_solution_displayer msd)
+dlx_displayer_set (Univers univers, dlx_solution_displayer msd, void *data)
 {
-  dlx_solution_displayer old = dlx_displayer;
+  dlx_solution_displayer old = univers->solution_displayer;
 
-  dlx_displayer = msd;
+  univers->solution_displayer = msd;
+  univers->solution_displayer_data = data;
   return old;
 }
 
@@ -365,6 +367,8 @@ Univers dlx_univers_create (unsigned long nb_elements, const char *elements[]) _
   univers->solution_length = 0;
   univers->uncover_column = 0;
   univers->uncover_column_length = 0;
+  univers->solution_displayer = 0;
+  univers->solution_displayer_data = 0;
 
   DLX_PRINT ("Elements in univers:");
   int redo = 0;
@@ -491,8 +495,9 @@ __attribute__ ((overloadable))
     elementInSubset->elementInNextSubsetContainingThisElementOfUnivers = elementInUnivers;
     elementInSubset->elementInPreviousSubsetContainingThisElementOfUnivers =
       elementInUnivers->elementInPreviousSubsetContainingThisElementOfUnivers;
-    elementInUnivers->elementInPreviousSubsetContainingThisElementOfUnivers->
-      elementInNextSubsetContainingThisElementOfUnivers = elementInSubset;
+    elementInUnivers->
+      elementInPreviousSubsetContainingThisElementOfUnivers->elementInNextSubsetContainingThisElementOfUnivers =
+      elementInSubset;
     elementInUnivers->elementInPreviousSubsetContainingThisElementOfUnivers = elementInSubset;
 
     if (first_element == 0)

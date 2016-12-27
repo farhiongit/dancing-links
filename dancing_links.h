@@ -20,15 +20,17 @@ extern int dlx_trace;
 /// @param [in] univers Univers
 /// @param [in] length Number of subseets in the solution
 /// @param [in] solution List of the \p length names of the subsets in the solution.
-typedef void (*dlx_solution_displayer) (Univers univers, unsigned long length, const char *const *solution);
+/// @param [in] data Pointer to user defined and allocated data passed to \p dlx_displayer_set().
+typedef void (*dlx_solution_displayer) (Univers univers, unsigned long length, const char *const *solution, void *data);
 
 /// Setter of solution displayer.
+/// @param [in] univers Univers
 /// @param [in] displayer Solution displayer to set.
+/// @param [in] data Pointer to user defined and allocated data passed.
 /// @return Solution displayer set by the previous call to dlx_displayer_set() (or \p NULL on first call).
 ///
-/// The function pointed to by \p displayer passed as an argument is called by dlx_exact_cover_search() every time a solution is found.
-/// If function pointer \p NULL is passed as an argument, solutions are displayed on standard terminal output.
-dlx_solution_displayer dlx_displayer_set (dlx_solution_displayer displayer);
+/// The function pointed to by \p displayer passed as an argument, if set, is called by dlx_exact_cover_search() every time a solution is found.
+dlx_solution_displayer dlx_displayer_set (Univers univers, dlx_solution_displayer displayer, void *data);
 
 /// Initializes a new univers.
 /// @param [in] list_of_elements List of elements of the univers, separated by separators.
