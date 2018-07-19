@@ -37,8 +37,7 @@
 int dlx_trace = 0;
 
 /// Display to terminal standard error if \p dlx_trace is set.
-#define DLX_PRINT(...) \
-do { if (dlx_trace) fprintf (stderr, __VA_ARGS__); } while (0)
+#define DLX_PRINT(...) fprintf (dlx_trace ? stderr : 0, __VA_ARGS__)
 
 /// Call the callback function \p dlx_displayer if set.
 #define DLX_DISPLAY_SOLUTION(univers, length, solution) \
@@ -57,12 +56,13 @@ do { if (univers->solution_displayer) univers->solution_displayer (univers, leng
 ///
 /// In OOP,
 /// - an abstract base class \p A would contain attributes \p previousElement and \p nextElement (of type \p A),
-/// - a class \p H would describe the head of a univers and would heritate from the base class \p A extended with an attribute \p size, the total number of subsets.
-/// - an abstract base class \p B would heritate from class \p A extended with attributes
+/// - a class \p H would describe the head of a univers and would inherite from the base class \p A extended with an attribute \p size,
+///   the total number of subsets.
+/// - an abstract base class \p B would inherite from class \p A extended with attributes
 ///   \p elementInPreviousSubsetContainingThisElementOfUnivers and \p elementInNextSubsetContainingThisElementOfUnivers (of type B).
-/// - a class \p U would describe elements of the univers, heritate from class \p B extended with attributes \p size,
+/// - a class \p U would describe elements of the univers, inherite from class \p B extended with attributes \p size,
 ///   the number of subsets containing this element, and \p name, the name of the element
-/// - a class \p S would describe elements part of subsets, heritate from class \p B extended with attributes \p elementInUnivers
+/// - a class \p S would describe elements part of subsets, inherite from class \p B extended with attributes \p elementInUnivers
 ///   (of type \p U), the element of the univers included in the subset and \p name, the name of the subset containing this element.
 ///
 /// In C, all attributes are gathered into a common structure and unnecessary attributes are left undefined.
@@ -668,7 +668,7 @@ dlx_exact_cover_search (Univers univers, int one_only)
   else
     nb_solutions = dlx_univers_search (univers, 0, 0, one_only);
 
-  if (!nb_solutions)
+  if (!nb_solutions)  // In case no solutions were found.
     DLX_DISPLAY_SOLUTION (univers, 0, 0);
 
   DLX_PRINT ("%lu solution%s found.\n\n", nb_solutions, nb_solutions == 1 ? "" : "s");
