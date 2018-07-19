@@ -42,7 +42,7 @@ test_sudoku (void)
       strcat (columns, "|");
     }
 
-  Univers sudoku = dlx_univers_create (columns);
+  Univers sudoku = dlx_univers_create (columns, "|");
 
   char line[strlen (inCell) + 1 + strlen (inRow) + 1 + strlen (inColumn) + 1 + strlen (inBox) + 1];
 
@@ -75,7 +75,7 @@ test_sudoku (void)
         inBox[3] = '0' + number;
         strcat (line, inBox);
 
-        dlx_subset_define (sudoku, cell, line);
+        dlx_subset_define (sudoku, cell, line, "|");
       }
 
   // Initial grid
@@ -366,21 +366,21 @@ static void
 various_tests (void)
 {
   //Test 2
-  Univers m = dlx_univers_create ("A;B;C;D;E;F;G");
+  Univers m = dlx_univers_create ("A;B;C;D;E;F;G", ";");
 
   // Set solution displayer.
   dlx_displayer_set (m, my_dlx_solution_displayer, 0);
 
-  dlx_subset_define (m, "L1", "C;E;F");
-  dlx_subset_define (m, "L2", "A;D;G");
-  dlx_subset_define (m, "L3", "B;C;F");
-  dlx_subset_define (m, "L4", "A;D");
-  dlx_subset_define (m, "L5", "B;G");
-  dlx_subset_define (m, "L6", "D;E;G");
+  dlx_subset_define (m, "L1", "C;E;F", ";");
+  dlx_subset_define (m, "L2", "A;D;G", ";");
+  dlx_subset_define (m, "L3", "B;C;F", ";");
+  dlx_subset_define (m, "L4", "A;D", ";");
+  dlx_subset_define (m, "L5", "B;G", ";");
+  dlx_subset_define (m, "L6", "D;E;G", ";");
 
-  dlx_subset_define (m, "L7", "A;B;C;D;E;F");
-  dlx_subset_define (m, "Lg", "G");
-  dlx_subset_define (m, "Le", "E");
+  dlx_subset_define (m, "L7", "A;B;C;D;E;F", ";");
+  dlx_subset_define (m, "Lg", "G", ";");
+  dlx_subset_define (m, "Le", "E", ";");
 
   dlx_exact_cover_search (m, 0);
 
@@ -390,30 +390,30 @@ various_tests (void)
   dlx_univers_destroy (m);
 
   //Test 3
-  m = dlx_univers_create ("A;A;B;A");
+  m = dlx_univers_create ("A;A;B;A", ";");
 
-  dlx_subset_define (m, "L", "");
-  dlx_subset_define (m, "L", "A");
-  dlx_subset_define (m, "", "B");
-  dlx_subset_define (m, "L", "A;B");
+  dlx_subset_define (m, "L", "", ";");
+  dlx_subset_define (m, "L", "A", ";");
+  dlx_subset_define (m, "", "B", ";");
+  dlx_subset_define (m, "L", "A;B", ";");
 
   dlx_exact_cover_search (m, 0);
 
   dlx_univers_destroy (m);
 
   //Test 4
-  m = dlx_univers_create ("A;B");
+  m = dlx_univers_create ("A;B", ";");
 
-  dlx_subset_define (m, "La", "A");
+  dlx_subset_define (m, "La", "A", ";");
 
   dlx_exact_cover_search (m, 0);
 
   dlx_univers_destroy (m);
 
   //Test 4nis
-  m = dlx_univers_create ("A;B");
+  m = dlx_univers_create ("A;B", ";");
 
-  dlx_subset_define (m, "La", "A");
+  dlx_subset_define (m, "La", "A", ";");
 
   dlx_subset_require_in_solution (m, "La");
 
@@ -422,10 +422,10 @@ various_tests (void)
   dlx_univers_destroy (m);
 
   //Test 5
-  m = dlx_univers_create ("A;B");
+  m = dlx_univers_create ("A;B", ";");
 
-  dlx_subset_define (m, "La", "A");
-  dlx_subset_define (m, "Lb", "B");
+  dlx_subset_define (m, "La", "A", ";");
+  dlx_subset_define (m, "Lb", "B", ";");
 
   dlx_subset_require_in_solution (m, "La");
   dlx_subset_require_in_solution (m, "Lb");
@@ -435,11 +435,11 @@ various_tests (void)
   dlx_univers_destroy (m);
 
   //Test 6
-  m = dlx_univers_create ("A;B");
+  m = dlx_univers_create ("A;B", ";");
 
-  dlx_subset_define (m, "La", "A;A;H");
-  dlx_subset_define (m, "Lb", "B");
-  dlx_subset_define (m, "L", "A;B;A");
+  dlx_subset_define (m, "La", "A;A;H", ";");
+  dlx_subset_define (m, "Lb", "B", ";");
+  dlx_subset_define (m, "L", "A;B;A", ";");
 
   dlx_subset_require_in_solution (m, "La");
   dlx_subset_require_in_solution (m, "Lb");
@@ -449,11 +449,11 @@ various_tests (void)
   dlx_univers_destroy (m);
 
   //Test 7
-  m = dlx_univers_create ("A;B");
+  m = dlx_univers_create ("A;B", ";");
 
-  dlx_subset_define (m, "La", "A");
-  dlx_subset_define (m, "Lb", "B");
-  dlx_subset_define (m, "L", "A;B");
+  dlx_subset_define (m, "La", "A", ";");
+  dlx_subset_define (m, "Lb", "B", ";");
+  dlx_subset_define (m, "L", "A;B", ";");
 
   dlx_subset_require_in_solution (m, "La");
   dlx_subset_require_in_solution (m, "L");

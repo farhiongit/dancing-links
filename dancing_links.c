@@ -44,9 +44,6 @@ do { if (dlx_trace) fprintf (stderr, __VA_ARGS__); } while (0)
 #define DLX_DISPLAY_SOLUTION(univers, length, solution) \
 do { if (univers->solution_displayer) univers->solution_displayer (univers, length, solution, univers->solution_displayer_data); } while (0)
 
-/// Allowed separators for lists of names of elements.
-static const char *ELEMENT_SEPARATOR = ",;:|";
-
 /// Structure of an element (the head, an element of the univers or an element of a subset)
 ///
 /// There are three types of elements:
@@ -93,7 +90,7 @@ struct univers
   unsigned long solution_length;        ///< Length of the buffer (number of subsets in solution.)
 
   struct element **uncover_column;      ///< List of subsets required in solutions (an element of this subset.)
-  unsigned long uncover_column_length;  ///< Number of subsets required in solutions. 
+  unsigned long uncover_column_length;  ///< Number of subsets required in solutions.
 
   dlx_solution_displayer solution_displayer;    ///< Callback function to display a solution
 
@@ -399,7 +396,7 @@ Univers dlx_univers_create (unsigned long nb_elements, const char *elements[]) _
   return univers;
 }
 
-Univers dlx_univers_create (const char *elements) __attribute__ ((overloadable))
+Univers dlx_univers_create (const char *elements, const char *separators) __attribute__ ((overloadable))
 {
   if (!elements)
     return 0;
@@ -410,7 +407,7 @@ Univers dlx_univers_create (const char *elements) __attribute__ ((overloadable))
 
   sccpy = strdup (elements);
   nb_cols = 0;
-  for (char *c = sccpy; strtok_r (c, ELEMENT_SEPARATOR, &saveptr); c = 0)
+  for (char *c = sccpy; strtok_r (c, separators, &saveptr); c = 0)
     nb_cols++;
   free (sccpy);
 
@@ -422,7 +419,7 @@ Univers dlx_univers_create (const char *elements) __attribute__ ((overloadable))
 
   sccpy = strdup (elements);
   nb_cols = 0;
-  for (char *c = sccpy; (colname = strtok_r (c, ELEMENT_SEPARATOR, &saveptr)); c = 0)
+  for (char *c = sccpy; (colname = strtok_r (c, separators, &saveptr)); c = 0)
     cols[nb_cols++] = colname;
 
   /// @overload
@@ -546,7 +543,7 @@ __attribute__ ((overloadable))
   }
 }
 
-int dlx_subset_define (Univers univers, const char *subset_name, const char *some_elements)
+int dlx_subset_define (Univers univers, const char *subset_name, const char *some_elements, const char *separators)
   __attribute__ ((overloadable))
 {
   if (!some_elements)
@@ -558,7 +555,7 @@ int dlx_subset_define (Univers univers, const char *subset_name, const char *som
 
   sccpy = strdup (some_elements);
   nb_cols = 0;
-  for (char *c = sccpy; strtok_r (c, ELEMENT_SEPARATOR, &saveptr); c = 0)
+  for (char *c = sccpy; strtok_r (c, separators, &saveptr); c = 0)
     nb_cols++;
   free (sccpy);
 
@@ -570,7 +567,7 @@ int dlx_subset_define (Univers univers, const char *subset_name, const char *som
 
   sccpy = strdup (some_elements);
   nb_cols = 0;
-  for (char *c = sccpy; (colname = strtok_r (c, ELEMENT_SEPARATOR, &saveptr)); c = 0)
+  for (char *c = sccpy; (colname = strtok_r (c, separators, &saveptr)); c = 0)
     cols[nb_cols++] = colname;
 
   /// @overload

@@ -18,7 +18,7 @@ extern int dlx_trace;
 
 /// Solution displayer signature
 /// @param [in] univers Univers
-/// @param [in] length Number of subseets in the solution
+/// @param [in] length Number of subsets in the solution
 /// @param [in] solution List of the \p length names of the subsets in the solution.
 /// @param [in] data Pointer to user defined and allocated data passed to \p dlx_displayer_set().
 typedef void (*dlx_solution_displayer) (Univers univers, unsigned long length, const char *const *solution, void *data);
@@ -34,10 +34,12 @@ dlx_solution_displayer dlx_displayer_set (Univers univers, dlx_solution_displaye
 
 /// Initializes a new univers.
 /// @param [in] list_of_elements List of elements of the univers, separated by separators.
+/// @param [in] separators List of accepted separators, terminated by \0.
+///             The separators argument specifies a set of bytes that delimit the tokens in the parsed string.
+///             The caller may specify different strings in separators in successive calls that parse the same string.
 /// @return univers
 /// @post User must call dlx_univers_destroy(Univers univers) later.
-/// @note Valid separators are defined by #ELEMENT_SEPARATOR.
-Univers dlx_univers_create (const char *list_of_elements) __attribute__ ((overloadable));
+Univers dlx_univers_create (const char *list_of_elements, const char *separators) __attribute__ ((overloadable));
 
 /// Initializes a new univers.
 /// @param [in] nb_elements Number of elements of the univers.
@@ -50,9 +52,11 @@ Univers dlx_univers_create (unsigned long nb_elements, const char *elements[]) _
 /// @param [in] univers Univers
 /// @param [in] subset_name Name of the added subset
 /// @param [in] list_of_some_elements List of elements of the univers contained in the subset, separated by separators.
+/// @param [in] separators List of accepted separators, terminated by \0.
+///             The separators argument specifies a set of bytes that delimit the tokens in the parsed string.
+///             The caller may specify different strings in separators in successive calls that parse the same string.
 /// @return 1 if added sucessfully, 0 otherwise
-/// @note Valid separators are defined by #ELEMENT_SEPARATOR.
-int dlx_subset_define (Univers univers, const char *subset_name, const char *list_of_some_elements)
+int dlx_subset_define (Univers univers, const char *subset_name, const char *list_of_some_elements, const char *separators)
   __attribute__ ((overloadable));
 
 /// Adds a subset to the univers.
@@ -77,7 +81,7 @@ int dlx_subset_require_in_solution (Univers univers, const char *subset_name);
 ///
 /// Every time (or only the first time if \p one_only is set) a solution is found,
 /// the function \p displayer declared by a previous call to dlx_displayer_set(dlx_solution_displayer displayer) is called with three arguments:
-/// - the identifier of the univers \p univers, 
+/// - the identifier of the univers \p univers,
 /// - the number of subsets included in the solution,
 /// - the list of the names of the subsets included in the solution.
 ///
@@ -87,7 +91,7 @@ unsigned long dlx_exact_cover_search (Univers univers, int one_only);
 
 /// Releases data used by the univers.
 /// @param [in] univers Univers
-/// @pre Use dlx_univers_create(const char *elements) or ::dlx_univers_create(unsigned long nb_elements, const char *elements[]) first.
+/// @pre Use dlx_univers_create(const char *elements, const char *separators) or dlx_univers_create(unsigned long nb_elements, const char *elements[]) first.
 void dlx_univers_destroy (Univers univers);
 
 #endif
