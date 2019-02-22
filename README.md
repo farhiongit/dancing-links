@@ -31,7 +31,7 @@ Code compiles with C compiler **clang** only as it makes use of `__attribute__ (
 
 # Usage
 
-1. Create a univers of elements with `dlx_univers_create`.
+1. Create a universe of elements with `dlx_universe_create`.
 
 2. Create subsets of elements with successive calls to `dlx_subset_define`.
 
@@ -39,9 +39,9 @@ Code compiles with C compiler **clang** only as it makes use of `__attribute__ (
 
 4. Optionally declare a callback function to be called for every solution found with `dlx_displayer_set`.
 
-5. Search for all sets of sunsets exactly covering the univers with `dlx_exact_cover_search`.
+5. Search for all sets of subsets exactly covering the universe with `dlx_exact_cover_search`.
 
-6. Release the univers with `dlx_univers_destroy`.
+6. Release the universe with `dlx_universe_destroy`.
 
 All functions are declared in the header file `dancing_links.h`.
 

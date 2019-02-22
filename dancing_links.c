@@ -31,7 +31,7 @@
 
 #include "dancing_links.h"
 
-/// If set, the non-determistic choice (by \p dlx_univers_choose_element) of column is optimized heuristically.
+/// If set, the non-determistic choice (by \p dlx_universe_choose_element) of column is optimized heuristically.
 #define OPTIMIZE_CHOICE 1
 
 int dlx_trace = 0;
@@ -40,49 +40,49 @@ int dlx_trace = 0;
 #define DLX_PRINT(...) fprintf (dlx_trace ? stderr : 0, __VA_ARGS__)
 
 /// Call the callback function \p dlx_displayer if set.
-#define DLX_DISPLAY_SOLUTION(univers, length, solution) \
-do { if (univers->solution_displayer) univers->solution_displayer (univers, length, solution, univers->solution_displayer_data); } while (0)
+#define DLX_DISPLAY_SOLUTION(universe, length, solution) \
+do { if (universe->solution_displayer) universe->solution_displayer (universe, length, solution, universe->solution_displayer_data); } while (0)
 
-/// Structure of an element (the head, an element of the univers or an element of a subset)
+/// Structure of an element (the head, an element of the universe or an element of a subset)
 ///
 /// There are three types of elements:
-/// - The head is not a real element but the entry point to the elements of the univers. Its name is "|HEAD|".
-/// - Elements of the univers. Each element of the univers is an entry point to the elements in subsets.
-/// - Elements into subsets. An element is included in a subset when it is linked to an element of the univers.
+/// - The head is not a real element but the entry point to the elements of the universe. Its name is "|HEAD|".
+/// - Elements of the universz. Each element of the universe is an entry point to the elements in subsets.
+/// - Elements into subsets. An element is included in a subset when it is linked to an element of the universe.
 ///
-/// The head and elements of univers are doubly linked as circular lists (\p previousElement and \p nextElement).
-/// An element of the univers and subsets containing this element of the univers are doubly linked as circular lists (\p elementInPreviousSubsetContainingThisElementOfUnivers and \p elementInNextSubsetContainingThisElementOfUnivers).
+/// The head and elements of universe are doubly linked as circular lists (\p previousElement and \p nextElement).
+/// An element of the universe and subsets containing this element of the universe are doubly linked as circular lists (\p elementInPreviousSubsetContainingThisElementOfUnivers and \p elementInNextSubsetContainingThisElementOfUnivers).
 /// The elements of a subset are doubly linked as circular lists (\p previousElement and \p nextElement).
 ///
 /// In OOP,
 /// - an abstract base class \p A would contain attributes \p previousElement and \p nextElement (of type \p A),
-/// - a class \p H would describe the head of a univers and would inherite from the base class \p A extended with an attribute \p size,
+/// - a class \p H would describe the head of a universe and would inherite from the base class \p A extended with an attribute \p size,
 ///   the total number of subsets.
 /// - an abstract base class \p B would inherite from class \p A extended with attributes
 ///   \p elementInPreviousSubsetContainingThisElementOfUnivers and \p elementInNextSubsetContainingThisElementOfUnivers (of type B).
-/// - a class \p U would describe elements of the univers, inherite from class \p B extended with attributes \p size,
+/// - a class \p U would describe elements of the universe, inherite from class \p B extended with attributes \p size,
 ///   the number of subsets containing this element, and \p name, the name of the element
 /// - a class \p S would describe elements part of subsets, inherite from class \p B extended with attributes \p elementInUnivers
-///   (of type \p U), the element of the univers included in the subset and \p name, the name of the subset containing this element.
+///   (of type \p U), the element of the universe included in the subset and \p name, the name of the subset containing this element.
 ///
 /// In C, all attributes are gathered into a common structure and unnecessary attributes are left undefined.
 struct element
 {
-  char *name;                   ///< Name of the head ("|HEAD|"), of the element of the univers, or of the subset containing the element of a subset.
-  unsigned long int size;       ///< Number of subsets (for head) or of subsets containing an element of the univers. Left undefined for elements of subsets.
+  char *name;                   ///< Name of the head ("|HEAD|"), of the element of the universe, or of the subset containing the element of a subset.
+  unsigned long int size;       ///< Number of subsets (for head) or of subsets containing an element of the universe. Left undefined for elements of subsets.
 
-  struct element *previousElement;      ///< Link to the previous element in univers or in the subset.
-  struct element *nextElement;  ///< Link to the previous element in univers or in the subset.
-  struct element *elementInPreviousSubsetContainingThisElementOfUnivers;        ///< Link to the same element in the previous subset. Left undefined for head.
-  struct element *elementInNextSubsetContainingThisElementOfUnivers;    ///< Link to the same element in the next subset. Left undefined for head.
+  struct element *previousElement;      ///< Link to the previous element in universe or in the subset.
+  struct element *nextElement;  ///< Link to the previous element in universe or in the subset.
+  struct element *elementInPreviousSubsetContainingThisElementOfUniverse;        ///< Link to the same element in the previous subset. Left undefined for head.
+  struct element *elementInNextSubsetContainingThisElementOfUniverse;    ///< Link to the same element in the next subset. Left undefined for head.
 
-  struct element *elementInUnivers;     ///< Link to the element in univers. Left undefined for head and elements in univers.
+  struct element *elementInUniverse;     ///< Link to the element in universe. Left undefined for head and elements in universe.
 };
 
 /// The Univers object.
 ///
-/// Links to the first element of the univers (head), the solutions found, as well as subsets required in solutions.
-struct univers
+/// Links to the first element of the universe (head), the solutions found, as well as subsets required in solutions.
+struct universe
 {
   struct element *head;         ///< The pointer to the head element that references elements and subsets.
 
@@ -99,7 +99,7 @@ struct univers
 
 /// Gets an element by its name.
 /// @param [in] head Univers head
-/// @param [in] element_name Name of the element in univers to be fetched
+/// @param [in] element_name Name of the element in universe to be fetched
 static struct element *
 dlx_head_get_element_by_name (struct element *head, const char *element_name)
 {
@@ -114,7 +114,7 @@ dlx_head_get_element_by_name (struct element *head, const char *element_name)
     return 0;
 }
 
-/// Adds an element in the univers.
+/// Adds an element in the universe.
 /// @param [in] head Univers head
 /// @param [in] name Name of the element to be added
 static int
@@ -123,17 +123,17 @@ dlx_head_add_element (struct element *head, const char *name)
   if (dlx_head_get_element_by_name (head, name))
     return 0;
 
-  /// Initializes the element in the univers.
+  /// Initializes the element in the universe.
   struct element *element = malloc (sizeof (*element));
 
   element->name = strdup (name);
 
   element->size = 0;
 
-  element->elementInPreviousSubsetContainingThisElementOfUnivers =
-    element->elementInNextSubsetContainingThisElementOfUnivers = element;
+  element->elementInPreviousSubsetContainingThisElementOfUniverse =
+    element->elementInNextSubsetContainingThisElementOfUniverse = element;
 
-  /// The head and elements of univers are doubly linked as circular lists (\p previousElement and \p nextElement).
+  /// The head and elements of universe are doubly linked as circular lists (\p previousElement and \p nextElement).
   element->nextElement = head;
   element->previousElement = head->previousElement;
 
@@ -145,10 +145,10 @@ dlx_head_add_element (struct element *head, const char *name)
   return 1;
 }
 
-/// Chooses an element in the univers.
+/// Chooses an element in the universe.
 /// @param [in] head Univers head
-/// @return Chosen element in univers
-/// @note Makes use of flag #OPTIMIZE_CHOICE to select the element with the minimal number of subsets that contain it (if set) or the first element, in order of the elements declared in the univers (if not).
+/// @return Chosen element in universe
+/// @note Makes use of flag #OPTIMIZE_CHOICE to select the element with the minimal number of subsets that contain it (if set) or the first element, in order of the elements declared in the universe (if not).
 static struct element *
 dlx_head_choose_element (struct element *head)
 {
@@ -174,22 +174,22 @@ dlx_head_choose_element (struct element *head)
 /// @param [in] elementInUnivers Element to be removed.
 /// @post User must call dlx_element_uncover(struct element *elementInUnivers) later.
 ///
-/// We remove the element from the univers.
-/// The elements in subsets that contains this element are also removed from the univers.
+/// We remove the element from the universe.
+/// The elements in subsets that contains this element are also removed from the universe.
 static void
-dlx_element_cover (struct element *elementInUnivers)
+dlx_element_cover (struct element *elementInUniverse)
 {
-  elementInUnivers->nextElement->previousElement = elementInUnivers->previousElement;
-  elementInUnivers->previousElement->nextElement = elementInUnivers->nextElement;
+  elementInUniverse->nextElement->previousElement = elementInUniverse->previousElement;
+  elementInUniverse->previousElement->nextElement = elementInUniverse->nextElement;
 
-  for (struct element * i = elementInUnivers->elementInNextSubsetContainingThisElementOfUnivers; i != elementInUnivers; i = i->elementInNextSubsetContainingThisElementOfUnivers)       // all subsets containing the element.
+  for (struct element * i = elementInUniverse->elementInNextSubsetContainingThisElementOfUniverse; i != elementInUniverse; i = i->elementInNextSubsetContainingThisElementOfUniverse)       // all subsets containing the element.
     for (struct element * j = i->nextElement; j != i; j = j->nextElement)       // all other elements in the subset
     {
-      j->elementInNextSubsetContainingThisElementOfUnivers->elementInPreviousSubsetContainingThisElementOfUnivers =
-        j->elementInPreviousSubsetContainingThisElementOfUnivers;
-      j->elementInPreviousSubsetContainingThisElementOfUnivers->elementInNextSubsetContainingThisElementOfUnivers =
-        j->elementInNextSubsetContainingThisElementOfUnivers;
-      j->elementInUnivers->size--;      // The number of subsets containing this element is decremented.
+      j->elementInNextSubsetContainingThisElementOfUniverse->elementInPreviousSubsetContainingThisElementOfUniverse =
+        j->elementInPreviousSubsetContainingThisElementOfUniverse;
+      j->elementInPreviousSubsetContainingThisElementOfUniverse->elementInNextSubsetContainingThisElementOfUniverse =
+        j->elementInNextSubsetContainingThisElementOfUniverse;
+      j->elementInUniverse->size--;      // The number of subsets containing this element is decremented.
     }
 }
 
@@ -197,57 +197,57 @@ dlx_element_cover (struct element *elementInUnivers)
 /// @param [in] elementInUnivers Element to be restored.
 /// @pre Use dlx_element_cover(struct element *elementInUnivers) first.
 static void
-dlx_element_uncover (struct element *elementInUnivers)
+dlx_element_uncover (struct element *elementInUniverse)
 {
-  for (struct element * i = elementInUnivers->elementInPreviousSubsetContainingThisElementOfUnivers;
-       i != elementInUnivers; i = i->elementInPreviousSubsetContainingThisElementOfUnivers)
+  for (struct element * i = elementInUniverse->elementInPreviousSubsetContainingThisElementOfUniverse;
+       i != elementInUniverse; i = i->elementInPreviousSubsetContainingThisElementOfUniverse)
     for (struct element * j = i->previousElement; j != i; j = j->previousElement)
     {
-      j->elementInUnivers->size++;      // The number of subsets containing this element is incremented.
-      j->elementInPreviousSubsetContainingThisElementOfUnivers->elementInNextSubsetContainingThisElementOfUnivers = j;
-      j->elementInNextSubsetContainingThisElementOfUnivers->elementInPreviousSubsetContainingThisElementOfUnivers = j;
+      j->elementInUniverse->size++;      // The number of subsets containing this element is incremented.
+      j->elementInPreviousSubsetContainingThisElementOfUniverse->elementInNextSubsetContainingThisElementOfUniverse = j;
+      j->elementInNextSubsetContainingThisElementOfUniverse->elementInPreviousSubsetContainingThisElementOfUniverse = j;
     }
 
-  elementInUnivers->previousElement->nextElement = elementInUnivers;
-  elementInUnivers->nextElement->previousElement = elementInUnivers;
+  elementInUniverse->previousElement->nextElement = elementInUniverse;
+  elementInUniverse->nextElement->previousElement = elementInUniverse;
 }
 
 /// Displays a solution.
-/// @param [in] univers Univers
+/// @param [in] universe Universe
 /// @param [in] solutions Solutions to be dispplayed. Each solution is a list of elements.
 static void
-dlx_univers_display_solutions (Univers univers, struct element **solutions)
+dlx_universe_display_solutions (Universe universe, struct element **solutions)
 {
-  unsigned long length = univers->solution_length - univers->head->size;
+  unsigned long length = universe->solution_length - universe->head->size;
 
-  for (unsigned long i = univers->solution_length - univers->head->size; i < univers->solution_length; i++)
+  for (unsigned long i = universe->solution_length - universe->head->size; i < universe->solution_length; i++)
   {
-    free (univers->solution[i]);
-    univers->solution[i] = 0;
+    free (universe->solution[i]);
+    universe->solution[i] = 0;
   }
 
   DLX_PRINT ("Exact cover solution:\n");
-  if (!univers->head->size || !solutions || !solutions[0])
+  if (!universe->head->size || !solutions || !solutions[0])
   {
     DLX_PRINT ("  Already exactly covered. No more subsets required.\n");
   }
   else
   {
-    for (unsigned long k = 0; k < univers->head->size && solutions[k]; k++)
+    for (unsigned long k = 0; k < universe->head->size && solutions[k]; k++)
     {
-      DLX_PRINT ("  [%lu]\tSubset %s:", univers->solution_length - univers->head->size + k + 1, *solutions[k]->name ? solutions[k]->name : "(unnamed)");        // line name
+      DLX_PRINT ("  [%lu]\tSubset %s:", universe->solution_length - universe->head->size + k + 1, *solutions[k]->name ? solutions[k]->name : "(unnamed)");        // line name
       struct element *elementInSubset = solutions[k];
 
       do
       {
-        DLX_PRINT (" %s", elementInSubset->elementInUnivers->name);     // name pf element
+        DLX_PRINT (" %s", elementInSubset->elementInUniverse->name);     // name pf element
         elementInSubset = elementInSubset->nextElement;
       }
       while (elementInSubset != solutions[k]);
 
       DLX_PRINT ("\n");
 
-      univers->solution[univers->solution_length - univers->head->size + k] = strdup (solutions[k]->name);
+      universe->solution[universe->solution_length - universe->head->size + k] = strdup (solutions[k]->name);
       length++;
     }
   }
@@ -255,50 +255,50 @@ dlx_univers_display_solutions (Univers univers, struct element **solutions)
   // Why can't it be passed a char ** to a function which expects a const char ** (Warning : discards qualifiers in nested pointer types) ?
   // The reason that you cannot assign a char ** value to a const char ** pointer in C is somewhat obscure.
   // It is allowed in C++, but not in C. References: ISO Sec. 6.1.2.6, Sec. 6.3.16.1, Sec. 6.5.3.
-  DLX_DISPLAY_SOLUTION (univers, length, (const char *const *) univers->solution);
+  DLX_DISPLAY_SOLUTION (universe, length, (const char *const *) universe->solution);
 
-  for (unsigned long i = univers->solution_length - univers->head->size; i < univers->solution_length; i++)
+  for (unsigned long i = universe->solution_length - universe->head->size; i < universe->solution_length; i++)
   {
-    free (univers->solution[i]);
-    univers->solution[i] = 0;
+    free (universe->solution[i]);
+    universe->solution[i] = 0;
   }
 }
 
 /// Recursive function to search for solutions.
-/// @param [in] univers Univers
+/// @param [in] universe Universe
 /// @param [in] solutions Solution to be dispplayed.
 /// @param [in] k Depth of search
 /// @param [in] one_only If set, searches for the first solution only.
 /// @return Number of solutions found.
 static unsigned long
-dlx_univers_search (Univers univers, struct element **solutions, unsigned long k, int one_only)
+dlx_universe_search (Universe universe, struct element **solutions, unsigned long k, int one_only)
 {
-  // If there is no more element in the univers, this means all elements have been covered successfully.
+  // If there is no more element in the universe, this means all elements have been covered successfully.
   // We have found a solution that we can display.
-  if (univers->head->nextElement == univers->head)
+  if (universe->head->nextElement == universe->head)
   {
-    dlx_univers_display_solutions (univers, solutions);
+    dlx_universe_display_solutions (universe, solutions);
     return 1;
   }
 
   // Otherwise, we search for an exact cover search: a group of subsets such that the union of them
-  // contains all the elements of the univers and any intersection between two of them is empty.
+  // contains all the elements of the universe and any intersection between two of them is empty.
 
   int solution_found = 0;
 
   // We peek an element deterministically (all elements will have been peeked sucessively at last.)
   // We keep a reference to the uncovered element for further access.
-  struct element *c = dlx_head_choose_element (univers->head);
+  struct element *c = dlx_head_choose_element (universe->head);
 
-  // We can remove this element from the univers, since we will retain one of the subsets containig it in the solution
+  // We can remove this element from the universe, since we will retain one of the subsets containig it in the solution
   // and we won't have to consider this element anymore.
   dlx_element_cover (c);
 
   // One and only one of the subsets containing this element will have to be included in the solution.
   // One after the other, we try to keep each subset containing the element in the solution,
   // one after the other, nondeterministically.
-  for (struct element * r = c->elementInNextSubsetContainingThisElementOfUnivers; r != c;
-       r = r->elementInNextSubsetContainingThisElementOfUnivers)
+  for (struct element * r = c->elementInNextSubsetContainingThisElementOfUniverse; r != c;
+       r = r->elementInNextSubsetContainingThisElementOfUniverse)
   {
     // We consider, as a trial-and-error approach, that the subset containing the element is part of the solution.
     solutions[k] = r;
@@ -313,17 +313,17 @@ dlx_univers_search (Univers univers, struct element **solutions, unsigned long k
       // Furthermore, the solution can not contain other subsets that
       // contain the same elements, otherwise,
       // there would be more than one subset containig the same element in the solution.
-      // Thus, elements in those other subsets can be removed from the univers.
-      dlx_element_cover (j->elementInUnivers);
+      // Thus, elements in those other subsets can be removed from the universe.
+      dlx_element_cover (j->elementInUniverse);
     }
 
-    /// Calls \p dlx_univers_search recursively (backtracking), incrementing \p k.
-    solution_found += dlx_univers_search (univers, solutions, k + 1, one_only);
+    /// Calls \p dlx_universe_search recursively (backtracking), incrementing \p k.
+    solution_found += dlx_universe_search (universe, solutions, k + 1, one_only);
 
     solutions[k] = 0;
 
     for (struct element * j = r->previousElement; j != r; j = j->previousElement)
-      dlx_element_uncover (j->elementInUnivers);
+      dlx_element_uncover (j->elementInUniverse);
 
     if (solution_found && one_only)
       break;
@@ -331,43 +331,43 @@ dlx_univers_search (Univers univers, struct element **solutions, unsigned long k
 
   dlx_element_uncover (c);
 
-  // The univers is fully restored (all elements uncovered).
+  // The universe is fully restored (all elements uncovered).
 
   return solution_found;
 }
 
 dlx_solution_displayer
-dlx_displayer_set (Univers univers, dlx_solution_displayer msd, void *data)
+dlx_displayer_set (Universe universe, dlx_solution_displayer msd, void *data)
 {
-  dlx_solution_displayer old = univers->solution_displayer;
+  dlx_solution_displayer old = universe->solution_displayer;
 
-  univers->solution_displayer = msd;
-  univers->solution_displayer_data = data;
+  universe->solution_displayer = msd;
+  universe->solution_displayer_data = data;
   return old;
 }
 
-Univers dlx_univers_create (unsigned long nb_elements, const char *elements[]) __attribute__ ((overloadable))
+Universe dlx_universe_create (unsigned long nb_elements, const char *elements[]) __attribute__ ((overloadable))
 {
   if (!nb_elements || !elements)
     return 0;
 
-  Univers univers = malloc (sizeof (*univers));
+  Universe universe = malloc (sizeof (*universe));
 
-  univers->head = malloc (sizeof (*univers->head));
+  universe->head = malloc (sizeof (*universe->head));
 
-  univers->head->previousElement = univers->head->nextElement = univers->head;
-  univers->head->size = 0;
-  univers->head->name = "|HEAD|";
+  universe->head->previousElement = universe->head->nextElement = universe->head;
+  universe->head->size = 0;
+  universe->head->name = "|HEAD|";
   // Other unused components of head are left undefined.
 
-  univers->solution = 0;
-  univers->solution_length = 0;
-  univers->uncover_column = 0;
-  univers->uncover_column_length = 0;
-  univers->solution_displayer = 0;
-  univers->solution_displayer_data = 0;
+  universe->solution = 0;
+  universe->solution_length = 0;
+  universe->uncover_column = 0;
+  universe->uncover_column_length = 0;
+  universe->solution_displayer = 0;
+  universe->solution_displayer_data = 0;
 
-  DLX_PRINT ("Elements in univers:");
+  DLX_PRINT ("Elements in universe:");
   int redo = 0;
 
   for (unsigned long i = 0; i < nb_elements; i++)
@@ -376,7 +376,7 @@ Univers dlx_univers_create (unsigned long nb_elements, const char *elements[]) _
       continue;
 
     DLX_PRINT (" %s", elements[i]);
-    if (!dlx_head_add_element (univers->head, elements[i]))
+    if (!dlx_head_add_element (universe->head, elements[i]))
     {
       DLX_PRINT (" (already exists ==> not added)");
       redo = 1;
@@ -386,17 +386,17 @@ Univers dlx_univers_create (unsigned long nb_elements, const char *elements[]) _
   if (redo)
   {
     DLX_PRINT (" =");
-    for (struct element * element = univers->head->nextElement; element != univers->head;
+    for (struct element * element = universe->head->nextElement; element != universe->head;
          element = element->nextElement)
       DLX_PRINT (" %s", element->name);
   }
 
   DLX_PRINT ("\n");
 
-  return univers;
+  return universe;
 }
 
-Univers dlx_univers_create (const char *elements, const char *separators) __attribute__ ((overloadable))
+Universe dlx_universe_create (const char *elements, const char *separators) __attribute__ ((overloadable))
 {
   if (!elements)
     return 0;
@@ -423,7 +423,7 @@ Univers dlx_univers_create (const char *elements, const char *separators) __attr
     cols[nb_cols++] = colname;
 
   /// @overload
-  Univers ret = dlx_univers_create (nb_cols, cols);
+  Universe ret = dlx_universe_create (nb_cols, cols);
 
   free (sccpy);
 
@@ -431,10 +431,10 @@ Univers dlx_univers_create (const char *elements, const char *separators) __attr
 }
 
 int
-dlx_subset_define (Univers univers, const char *subset_name, unsigned long nb_elements, const char *elements[])
+dlx_subset_define (Universe universe, const char *subset_name, unsigned long nb_elements, const char *elements[])
 __attribute__ ((overloadable))
 {
-  if (!univers || !subset_name || !nb_elements || !elements)
+  if (!universe || !subset_name || !nb_elements || !elements)
     return 0;
 
   DLX_PRINT ("Elements in subset %s:", *subset_name ? subset_name : "(unnamed)");
@@ -448,9 +448,9 @@ __attribute__ ((overloadable))
       continue;
 
     DLX_PRINT (" %s", elements[i]);
-    struct element *elementInUnivers = 0;
+    struct element *elementInUniverse = 0;
 
-    if (!(elementInUnivers = dlx_head_get_element_by_name (univers->head, elements[i])))
+    if (!(elementInUniverse = dlx_head_get_element_by_name (universe->head, elements[i])))
     {
       DLX_PRINT (" (unknown element)");
       redo = 1;
@@ -467,7 +467,7 @@ __attribute__ ((overloadable))
 
       do
       {
-        if (!strcmp (elementInSubset->elementInUnivers->name, elements[i]))
+        if (!strcmp (elementInSubset->elementInUniverse->name, elements[i]))
           already_included = 1; // element already included in subset
         elementInSubset = elementInSubset->nextElement;
       }
@@ -485,17 +485,17 @@ __attribute__ ((overloadable))
     elementInSubset = malloc (sizeof (*elementInSubset));
 
     elementInSubset->name = strdup (subset_name);
-    elementInSubset->elementInUnivers = elementInUnivers;
-    elementInUnivers->size++;   // Number of subsets containing the element is incremented
+    elementInSubset->elementInUniverse = elementInUniverse;
+    elementInUniverse->size++;   // Number of subsets containing the element is incremented
 
-    /// The element of the univers and subsets containing this element of the univers are doubly linked as circular lists (\p elementInPreviousSubsetContainingThisElementOfUnivers and \p elementInNextSubsetContainingThisElementOfUnivers).
-    elementInSubset->elementInNextSubsetContainingThisElementOfUnivers = elementInUnivers;
-    elementInSubset->elementInPreviousSubsetContainingThisElementOfUnivers =
-      elementInUnivers->elementInPreviousSubsetContainingThisElementOfUnivers;
-    elementInUnivers->
-      elementInPreviousSubsetContainingThisElementOfUnivers->elementInNextSubsetContainingThisElementOfUnivers =
+    /// The element of the universe and subsets containing this element of the universe are doubly linked as circular lists (\p elementInPreviousSubsetContainingThisElementOfUnivers and \p elementInNextSubsetContainingThisElementOfUnivers).
+    elementInSubset->elementInNextSubsetContainingThisElementOfUniverse = elementInUniverse;
+    elementInSubset->elementInPreviousSubsetContainingThisElementOfUniverse =
+      elementInUniverse->elementInPreviousSubsetContainingThisElementOfUniverse;
+    elementInUniverse->
+      elementInPreviousSubsetContainingThisElementOfUniverse->elementInNextSubsetContainingThisElementOfUniverse =
       elementInSubset;
-    elementInUnivers->elementInPreviousSubsetContainingThisElementOfUnivers = elementInSubset;
+    elementInUniverse->elementInPreviousSubsetContainingThisElementOfUniverse = elementInSubset;
 
     if (first_element == 0)
     {
@@ -514,11 +514,11 @@ __attribute__ ((overloadable))
 
   if (first_element)            // At least one element was added to the subset
   {
-    univers->head->size++;      // Number of subsets
+    universe->head->size++;      // Number of subsets
 
-    univers->solution_length++;
-    univers->solution = realloc (univers->solution, univers->solution_length * sizeof (*univers->solution));
-    univers->solution[univers->solution_length - 1] = 0;
+    universe->solution_length++;
+    universe->solution = realloc (universe->solution, universe->solution_length * sizeof (*universe->solution));
+    universe->solution[universe->solution_length - 1] = 0;
 
     if (redo)
     {
@@ -527,7 +527,7 @@ __attribute__ ((overloadable))
 
       do
       {
-        DLX_PRINT (" %s", elementInSubset->elementInUnivers->name);
+        DLX_PRINT (" %s", elementInSubset->elementInUniverse->name);
         elementInSubset = elementInSubset->nextElement;
       }
       while (elementInSubset != first_element);
@@ -543,7 +543,7 @@ __attribute__ ((overloadable))
   }
 }
 
-int dlx_subset_define (Univers univers, const char *subset_name, const char *some_elements, const char *separators)
+int dlx_subset_define (Universe universe, const char *subset_name, const char *some_elements, const char *separators)
   __attribute__ ((overloadable))
 {
   if (!some_elements)
@@ -571,7 +571,7 @@ int dlx_subset_define (Univers univers, const char *subset_name, const char *som
     cols[nb_cols++] = colname;
 
   /// @overload
-  int ret = dlx_subset_define (univers, subset_name, nb_cols, cols);
+  int ret = dlx_subset_define (universe, subset_name, nb_cols, cols);
 
   free (sccpy);
 
@@ -579,23 +579,23 @@ int dlx_subset_define (Univers univers, const char *subset_name, const char *som
 }
 
 int
-dlx_subset_require_in_solution (Univers univers, const char *subset_name)
+dlx_subset_require_in_solution (Universe universe, const char *subset_name)
 {
-  if (!univers || !subset_name)
+  if (!universe || !subset_name)
     return 0;
 
   DLX_PRINT ("Subset required in any solution:\n");
-  DLX_PRINT ("  [%lu]\tSubset %s:", univers->solution_length - univers->head->size + 1, subset_name);
+  DLX_PRINT ("  [%lu]\tSubset %s:", universe->solution_length - universe->head->size + 1, subset_name);
 
   // In case of several candidate subsets (with the same name), a subset is chosen arbitrarily
-  // (the subset with an element in the first element, in order of addded element to the univers,
-  // then the first subset, in order of added subsets to the univers)
-  for (struct element * elementInUnivers = univers->head->nextElement; elementInUnivers != univers->head;
-       elementInUnivers = elementInUnivers->nextElement)
-    // Look for the first element of the subset 'subset_name' (in order of creation in univers).
-    for (struct element * elementInSubset = elementInUnivers->elementInNextSubsetContainingThisElementOfUnivers;
-         elementInSubset != elementInUnivers;
-         elementInSubset = elementInSubset->elementInNextSubsetContainingThisElementOfUnivers)
+  // (the subset with an element in the first element, in order of addded element to the universe,
+  // then the first subset, in order of added subsets to the universe)
+  for (struct element * elementInUniverse = universe->head->nextElement; elementInUniverse != universe->head;
+       elementInUniverse = elementInUniverse->nextElement)
+    // Look for the first element of the subset 'subset_name' (in order of creation in universe).
+    for (struct element * elementInSubset = elementInUniverse->elementInNextSubsetContainingThisElementOfUniverse;
+         elementInSubset != elementInUniverse;
+         elementInSubset = elementInSubset->elementInNextSubsetContainingThisElementOfUniverse)
       if (!strcmp (elementInSubset->name, subset_name))
       {
         // The selected subset conforms to theses conditions:
@@ -607,24 +607,24 @@ dlx_subset_require_in_solution (Univers univers, const char *subset_name)
         // and all the subsets which contain these elements, the required subset included.
         do
         {
-          DLX_PRINT (" %s", j->elementInUnivers->name); // Name of the element.
+          DLX_PRINT (" %s", j->elementInUniverse->name); // Name of the element.
 
           // This subset containing element might also contain elements which are
           // de facto included in the solution.
-          // We can therefore remove these elements from the univers.
+          // We can therefore remove these elements from the universe.
 
           // Furthermore, the solution can not contain subsets that
           // contain this element, otherwise,
           // there would be more than one subset containing this element in the solution.
-          // Thus, those elements can be removed from the univers.
+          // Thus, those elements can be removed from the universe.
 
-          dlx_element_cover (j->elementInUnivers);
+          dlx_element_cover (j->elementInUniverse);
 
-          // Keep a reference to the uncovered element for further access in dlx_univers_destroy.
-          univers->uncover_column_length++;
-          univers->uncover_column =
-            realloc (univers->uncover_column, univers->uncover_column_length * sizeof (*univers->uncover_column));
-          univers->uncover_column[univers->uncover_column_length - 1] = j->elementInUnivers;
+          // Keep a reference to the uncovered element for further access in dlx_universe_destroy.
+          universe->uncover_column_length++;
+          universe->uncover_column =
+            realloc (universe->uncover_column, universe->uncover_column_length * sizeof (*universe->uncover_column));
+          universe->uncover_column[universe->uncover_column_length - 1] = j->elementInUniverse;
 
           j = j->nextElement;
         }
@@ -632,8 +632,8 @@ dlx_subset_require_in_solution (Univers univers, const char *subset_name)
 
         DLX_PRINT ("\n");
 
-        univers->solution[univers->solution_length - univers->head->size] = strdup (subset_name);
-        univers->head->size--;
+        universe->solution[universe->solution_length - universe->head->size] = strdup (subset_name);
+        universe->head->size--;
 
         // break loops and return.
         return 1;
@@ -647,29 +647,29 @@ dlx_subset_require_in_solution (Univers univers, const char *subset_name)
 }
 
 unsigned long
-dlx_exact_cover_search (Univers univers, int one_only)
+dlx_exact_cover_search (Universe universe, int one_only)
 {
-  if (!univers)
+  if (!universe)
     return 0;
 
   DLX_PRINT ("Searching for %s exact cover solution%s.\n", one_only ? "the first" : "all", one_only ? "" : "s");
 
   unsigned long nb_solutions = 0;
 
-  if (univers->head->size)
+  if (universe->head->size)
   {
-    struct element *solutions[univers->head->size];
+    struct element *solutions[universe->head->size];
 
-    for (unsigned long i = 0; i <= univers->head->size; i++)
+    for (unsigned long i = 0; i <= universe->head->size; i++)
       solutions[i] = 0;
 
-    nb_solutions = dlx_univers_search (univers, solutions, 0, one_only);
+    nb_solutions = dlx_universe_search (universe, solutions, 0, one_only);
   }
   else
-    nb_solutions = dlx_univers_search (univers, 0, 0, one_only);
+    nb_solutions = dlx_universe_search (universe, 0, 0, one_only);
 
   if (!nb_solutions)  // In case no solutions were found.
-    DLX_DISPLAY_SOLUTION (univers, 0, 0);
+    DLX_DISPLAY_SOLUTION (universe, 0, 0);
 
   DLX_PRINT ("%lu solution%s found.\n\n", nb_solutions, nb_solutions == 1 ? "" : "s");
 
@@ -677,39 +677,39 @@ dlx_exact_cover_search (Univers univers, int one_only)
 }
 
 void
-dlx_univers_destroy (Univers univers)
+dlx_universe_destroy (Universe universe)
 {
-  if (!univers)
+  if (!universe)
     return;
 
-  for (unsigned long i = univers->uncover_column_length; i > 0; i--)
-    dlx_element_uncover (univers->uncover_column[i - 1]);
-  free (univers->uncover_column);
+  for (unsigned long i = universe->uncover_column_length; i > 0; i--)
+    dlx_element_uncover (universe->uncover_column[i - 1]);
+  free (universe->uncover_column);
 
   struct element *nc = 0;
 
-  for (struct element * elementInUnivers = univers->head->nextElement; elementInUnivers != univers->head;
-       elementInUnivers = nc)
+  for (struct element * elementInUniverse = universe->head->nextElement; elementInUniverse != universe->head;
+       elementInUniverse = nc)
   {
     struct element *ne = 0;
 
-    for (struct element * elementInSubset = elementInUnivers->elementInNextSubsetContainingThisElementOfUnivers;
-         elementInSubset != elementInUnivers; elementInSubset = ne)
+    for (struct element * elementInSubset = elementInUniverse->elementInNextSubsetContainingThisElementOfUniverse;
+         elementInSubset != elementInUniverse; elementInSubset = ne)
     {
       free (elementInSubset->name);
-      ne = elementInSubset->elementInNextSubsetContainingThisElementOfUnivers;
+      ne = elementInSubset->elementInNextSubsetContainingThisElementOfUniverse;
       free (elementInSubset);
     }
 
-    free (elementInUnivers->name);
-    nc = elementInUnivers->nextElement;
-    free (elementInUnivers);
+    free (elementInUniverse->name);
+    nc = elementInUniverse->nextElement;
+    free (elementInUniverse);
   }
-  free (univers->head);
+  free (universe->head);
 
-  for (unsigned long i = 0; i < univers->solution_length; i++)
-    free (univers->solution[i]);
-  free (univers->solution);
+  for (unsigned long i = 0; i < universe->solution_length; i++)
+    free (universe->solution[i]);
+  free (universe->solution);
 
-  free (univers);
+  free (universe);
 }

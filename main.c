@@ -42,7 +42,7 @@ test_sudoku (void)
       strcat (columns, "|");
     }
 
-  Univers sudoku = dlx_univers_create (columns, "|");
+  Universe sudoku = dlx_universe_create (columns, "|");
 
   char line[strlen (inCell) + 1 + strlen (inRow) + 1 + strlen (inColumn) + 1 + strlen (inBox) + 1];
 
@@ -99,7 +99,7 @@ test_sudoku (void)
 
   dlx_exact_cover_search (sudoku, 0);
 
-  dlx_univers_destroy (sudoku);
+  dlx_universe_destroy (sudoku);
 }
 
 struct cell
@@ -143,7 +143,7 @@ struct callback_data
 };
 
 static void
-my_dlx_solution_for_pentomino (Univers univers, unsigned long length, const char *const *solution, void *ptr)
+my_dlx_solution_for_pentomino (Universe universe, unsigned long length, const char *const *solution, void *ptr)
 {
   struct callback_data *data = ptr;
 
@@ -234,7 +234,7 @@ test_pentomino (void)
   };
 /* *INDENT-ON* */
 
-  // Initialize univers
+  // Initialize universe
   char *columns[sizeof (pentomino) / sizeof (*pentomino) + sizeof (grid) / sizeof (*grid)];
 
   for (int pento = 0; pento < sizeof (pentomino) / sizeof (*pentomino); pento++)
@@ -243,7 +243,7 @@ test_pentomino (void)
   for (int cell = 0; cell < sizeof (grid) / sizeof (*grid); cell++)
     columns[sizeof (pentomino) / sizeof (*pentomino) + cell] = grid[cell].name;
 
-  Univers univers = dlx_univers_create (sizeof (columns) / sizeof (*columns), (const char **) columns);
+  Universe universe = dlx_universe_create (sizeof (columns) / sizeof (*columns), (const char **) columns);
 
   // Initialize subsets
   int nb_subsets = 0;
@@ -308,7 +308,7 @@ test_pentomino (void)
             char subset_name[10];
 
             snprintf (subset_name, sizeof (subset_name) / sizeof (*subset_name), "%9i", nb_subsets);
-            dlx_subset_define (univers, subset_name, sizeof (subset) / sizeof (*subset), (const char **) subset);
+            dlx_subset_define (universe, subset_name, sizeof (subset) / sizeof (*subset), (const char **) subset);
 
             struct candidate candidate;
 
@@ -342,21 +342,21 @@ test_pentomino (void)
   data.grid = grid;
   data.grid_size = sizeof (grid) / sizeof (*grid);
 
-  dlx_displayer_set (univers, my_dlx_solution_for_pentomino, &data);
+  dlx_displayer_set (universe, my_dlx_solution_for_pentomino, &data);
 
-  dlx_exact_cover_search (univers, 0);
+  dlx_exact_cover_search (universe, 0);
 
   for (int c = 0; c < data.nb_candidates; c++)
     free (data.candidates[c].name);
   free (data.candidates);
 
-  dlx_univers_destroy (univers);
+  dlx_universe_destroy (universe);
 }
 
 static void
-my_dlx_solution_displayer (Univers univers, unsigned long length, const char *const *solution, void *data)
+my_dlx_solution_displayer (Universe universe, unsigned long length, const char *const *solution, void *data)
 {
-  printf ("\n---\nUnivers %p\nSolution: %lu elements\n", (void *) univers, length);
+  printf ("\n---\nUnivers %p\nSolution: %lu elements\n", (void *) universe, length);
   for (unsigned long i = 0; i < length; i++)
     printf ("'%s' ; ", solution[i]);
   printf ("\n---\n");
@@ -366,7 +366,7 @@ static void
 various_tests (void)
 {
   //Test 2
-  Univers m = dlx_univers_create ("A;B;C;D;E;F;G", ";");
+  Universe m = dlx_universe_create ("A;B;C;D;E;F;G", ";");
 
   // Set solution displayer.
   dlx_displayer_set (m, my_dlx_solution_displayer, 0);
@@ -387,10 +387,10 @@ various_tests (void)
   // Unset solution displayer.
   dlx_displayer_set (m, 0, 0);
 
-  dlx_univers_destroy (m);
+  dlx_universe_destroy (m);
 
   //Test 3
-  m = dlx_univers_create ("A;A;B;A", ";");
+  m = dlx_universe_create ("A;A;B;A", ";");
 
   dlx_subset_define (m, "L", "", ";");
   dlx_subset_define (m, "L", "A", ";");
@@ -399,19 +399,19 @@ various_tests (void)
 
   dlx_exact_cover_search (m, 0);
 
-  dlx_univers_destroy (m);
+  dlx_universe_destroy (m);
 
   //Test 4
-  m = dlx_univers_create ("A;B", ";");
+  m = dlx_universe_create ("A;B", ";");
 
   dlx_subset_define (m, "La", "A", ";");
 
   dlx_exact_cover_search (m, 0);
 
-  dlx_univers_destroy (m);
+  dlx_universe_destroy (m);
 
   //Test 4nis
-  m = dlx_univers_create ("A;B", ";");
+  m = dlx_universe_create ("A;B", ";");
 
   dlx_subset_define (m, "La", "A", ";");
 
@@ -419,10 +419,10 @@ various_tests (void)
 
   dlx_exact_cover_search (m, 0);
 
-  dlx_univers_destroy (m);
+  dlx_universe_destroy (m);
 
   //Test 5
-  m = dlx_univers_create ("A;B", ";");
+  m = dlx_universe_create ("A;B", ";");
 
   dlx_subset_define (m, "La", "A", ";");
   dlx_subset_define (m, "Lb", "B", ";");
@@ -432,10 +432,10 @@ various_tests (void)
 
   dlx_exact_cover_search (m, 0);
 
-  dlx_univers_destroy (m);
+  dlx_universe_destroy (m);
 
   //Test 6
-  m = dlx_univers_create ("A;B", ";");
+  m = dlx_universe_create ("A;B", ";");
 
   dlx_subset_define (m, "La", "A;A;H", ";");
   dlx_subset_define (m, "Lb", "B", ";");
@@ -446,10 +446,10 @@ various_tests (void)
 
   dlx_exact_cover_search (m, 0);
 
-  dlx_univers_destroy (m);
+  dlx_universe_destroy (m);
 
   //Test 7
-  m = dlx_univers_create ("A;B", ";");
+  m = dlx_universe_create ("A;B", ";");
 
   dlx_subset_define (m, "La", "A", ";");
   dlx_subset_define (m, "Lb", "B", ";");
@@ -460,7 +460,7 @@ various_tests (void)
 
   dlx_exact_cover_search (m, 0);
 
-  dlx_univers_destroy (m);
+  dlx_universe_destroy (m);
 }
 
 int
