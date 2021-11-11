@@ -338,7 +338,7 @@ test_pentomino (void)
   data.candidates = candidates;
   data.nb_candidates = nb_subsets;
   data.pentominoes = pentomino;
-  data.nb_pentominoes = sizeof (pentomino) / sizeof (pentomino);
+  data.nb_pentominoes = sizeof (pentomino) / sizeof (*pentomino);
   data.grid = grid;
   data.grid_size = sizeof (grid) / sizeof (*grid);
 
