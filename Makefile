@@ -1,5 +1,5 @@
-CC				= clang
-WARNINGS	= -Wall -pedantic
+CC        = clang
+WARNINGS	= -Wall -pedantic -Wextra
 #For debuging, use DEBUG instead of COMPILE
 COMPILE		= -pipe
 OPTIM			= -g

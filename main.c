@@ -145,6 +145,7 @@ struct callback_data
 static void
 my_dlx_solution_for_pentomino (Universe universe, unsigned long length, const char *const *solution, void *ptr)
 {
+  (void) universe;
   struct callback_data *data = ptr;
 
   char *board[8][8];
@@ -153,10 +154,10 @@ my_dlx_solution_for_pentomino (Universe universe, unsigned long length, const ch
     for (int j = 0; j < 8; j++)
       board[i][j] = 0;
 
-  for (int pento = 0; pento < length; pento++)
+  for (unsigned long pento = 0; pento < length; pento++)
     for (int candidate = 0; candidate < data->nb_candidates; candidate++)
       if (!strcmp (solution[pento], data->candidates[candidate].name))
-        for (int tile = 0;
+        for (size_t tile = 0;
              tile < sizeof (data->candidates[candidate].tile) / sizeof (*data->candidates[candidate].tile); tile++)
           for (int cell = 0; cell < data->grid_size; cell++)
             if (!strcmp (data->candidates[candidate].tile[tile].cell_name, data->grid[cell].name))
@@ -237,10 +238,10 @@ test_pentomino (void)
   // Initialize universe
   char *columns[sizeof (pentomino) / sizeof (*pentomino) + sizeof (grid) / sizeof (*grid)];
 
-  for (int pento = 0; pento < sizeof (pentomino) / sizeof (*pentomino); pento++)
+  for (size_t pento = 0; pento < sizeof (pentomino) / sizeof (*pentomino); pento++)
     columns[pento] = pentomino[pento].name;
 
-  for (int cell = 0; cell < sizeof (grid) / sizeof (*grid); cell++)
+  for (size_t cell = 0; cell < sizeof (grid) / sizeof (*grid); cell++)
     columns[sizeof (pentomino) / sizeof (*pentomino) + cell] = grid[cell].name;
 
   Universe universe = dlx_universe_create (sizeof (columns) / sizeof (*columns), (const char **) columns);
@@ -252,18 +253,18 @@ test_pentomino (void)
 
   int nb_fixed_pentominoes = 0;
 
-  for (int pento = 0; pento < sizeof (pentomino) / sizeof (*pentomino); pento++)
+  for (size_t pento = 0; pento < sizeof (pentomino) / sizeof (*pentomino); pento++)
   {
     subset[0] = pentomino[pento].name;
     for (int chirality = 1; chirality >= -1; chirality -= 2)
     {
       for (int rotation = 0; rotation < pentomino[pento].rotation; rotation++)
       {
-        for (int cell = 0; cell < sizeof (grid) / sizeof (*grid); cell++)
+        for (size_t cell = 0; cell < sizeof (grid) / sizeof (*grid); cell++)
         {
           int invalid_subset = 0;
 
-          for (int tile = 0; tile < sizeof (pentomino[pento].tile) / sizeof (*pentomino[pento].tile); tile++)
+          for (size_t tile = 0; tile < sizeof (pentomino[pento].tile) / sizeof (*pentomino[pento].tile); tile++)
           {
             int I = grid[cell].coord.x;
             int J = grid[cell].coord.y;
@@ -289,7 +290,7 @@ test_pentomino (void)
             }
 
             subset[1 + tile] = 0;
-            for (int other_cell = 0; other_cell < sizeof (grid) / sizeof (*grid); other_cell++)
+            for (size_t other_cell = 0; other_cell < sizeof (grid) / sizeof (*grid); other_cell++)
               if (grid[other_cell].coord.x == I && grid[other_cell].coord.y == J)
               {
                 subset[1 + tile] = grid[other_cell].name;
@@ -314,7 +315,7 @@ test_pentomino (void)
 
             candidate.name = strdup (subset_name);
             candidate.pentomino_name = subset[0];
-            for (int tile = 0; tile < sizeof (pentomino[pento].tile) / sizeof (*pentomino[pento].tile); tile++)
+            for (size_t tile = 0; tile < sizeof (pentomino[pento].tile) / sizeof (*pentomino[pento].tile); tile++)
               candidate.tile[tile].cell_name = subset[1 + tile];
 
             nb_subsets++;
@@ -356,6 +357,7 @@ test_pentomino (void)
 static void
 my_dlx_solution_displayer (Universe universe, unsigned long length, const char *const *solution, void *data)
 {
+  (void) data;
   printf ("\n---\nUnivers %p\nSolution: %lu elements\n", (void *) universe, length);
   for (unsigned long i = 0; i < length; i++)
     printf ("'%s' ; ", solution[i]);
