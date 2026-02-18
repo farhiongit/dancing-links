@@ -33,9 +33,9 @@ Code compiles with C compiler **clang** only as it makes use of `__attribute__ (
 
 1. Create a universe of elements with `dlx_universe_create`.
 
-2. Create subsets of elements with successive calls to `dlx_subset_define`.
+2. Create subsets of elements with successive calls to `dlx_subset_define`. For instance, this can be used (see examples) to define pentomino tiles.
 
-3. Optionally enforce one or several subsets to be included in every solution with successive calls to `dlx_subset_require_in_solution`.
+3. Optionally enforce one or several subsets to be included in every solution with successive calls to `dlx_subset_require_in_solution`. For instance, this can be used (see examples) to define initially filled cells of a sudoku grid.
 
 4. Optionally declare a callback function to be called for every solution found with `dlx_displayer_set`.
 

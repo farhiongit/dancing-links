@@ -88,6 +88,7 @@ int dlx_subset_define (Universe universe, const char *subset_name, unsigned long
 /// @param [in] universe Universe
 /// @param [in] subset_name Name of the required subset
 /// @return 1 if sucessful, 0 otherwise
+/// @post User can therefore optionally add constraints to the searched solutions.
 int dlx_subset_require_in_solution (Universe universe, const char *subset_name);
 
 /// Searches for all exact cover solutions.
