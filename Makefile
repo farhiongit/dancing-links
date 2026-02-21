@@ -2,9 +2,9 @@ CC        = clang
 WARNINGS	= -Wall -pedantic -Wextra
 #For debuging, use DEBUG instead of COMPILE
 COMPILE		= -pipe
-OPTIM			= -g
-#OPTIM			= -O3
-#PROF			= -pg
+#OPTIM		= -g
+OPTIM		= -O3
+#PROF		= -pg
 #For profiling, run executable, then "gprof <executable> gmon.out"
 #PROC_OPT        = -march=i686
 LD_OPT		= -s
@@ -17,9 +17,10 @@ LIB     = libdlx.a
 
 NM_OPT  =--extern-only --defined-only -Col
 
-all : run doc
+all : lib run doc
 
-$(OBJS) : $(SRCS) $(HDRS)
+.PHONY: lib
+lib: $(LIB)
 
 $(LIB) : $(OBJS)
 	@cloc --quiet --by-file-by-lang --force-lang="C",m $(SRCS) $(HDRS)
@@ -27,18 +28,20 @@ $(LIB) : $(OBJS)
 	ar rcs "$(LIB)" "$(OBJS)"
 	@nm $(NM_OPT) "$(LIB)"
 
+$(OBJS) : $(SRCS) $(HDRS)
+
 .PHONY: clean
 clean:
 	rm -f $(OBJS) $(LIB) core *~
 
-dancing_links_test: $(LIB) main.c
-	$(CC) $(CFLAGS) main.c $(LIB) -o dancing_links_test
-	#./dancing_links_test
-	valgrind --leak-check=full --show-leak-kinds=all ./dancing_links_test
-	gprof ./dancing_links_test gmon.out
-
 .PHONY: run
 run: dancing_links_test
+	./dancing_links_test
+	#valgrind --leak-check=full --show-leak-kinds=all ./dancing_links_test
+	#gprof ./dancing_links_test gmon.out
+
+dancing_links_test: $(LIB) main.c
+	$(CC) $(CFLAGS) main.c $(LIB) -o dancing_links_test
 
 .PHONY: doc
 doc: dancing_links.pdf

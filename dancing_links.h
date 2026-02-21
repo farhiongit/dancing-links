@@ -28,26 +28,6 @@
 /// Objet Universe
 typedef struct universe *Universe;
 
-/// Flag to trace execution on standard error terminal.
-/// Trace if set, keep quiet otherwise (default).
-extern int dlx_trace;
-
-/// Solution displayer signature
-/// @param [in] universe Universe
-/// @param [in] length Number of subsets in the solution
-/// @param [in] solution List of the \p length names of the subsets in the solution.
-/// @param [in] data Pointer to user defined and allocated data passed to \p dlx_displayer_set().
-typedef void (*dlx_solution_displayer) (Universe universe, unsigned long length, const char *const *solution, void *data);
-
-/// Setter of solution displayer.
-/// @param [in] universe Universe
-/// @param [in] displayer Solution displayer to set.
-/// @param [in] data Pointer to user defined and allocated data passed.
-/// @return Solution displayer set by the previous call to dlx_displayer_set() (or \p NULL on first call).
-///
-/// The function pointed to by \p displayer passed as an argument, if set, is called by dlx_exact_cover_search() every time a solution is found.
-dlx_solution_displayer dlx_displayer_set (Universe universe, dlx_solution_displayer displayer, void *data);
-
 /// Initializes a new universe.
 /// @param [in] list_of_elements List of elements of the universe, separated by separators.
 /// @param [in] separators List of accepted separators, terminated by \0.
@@ -91,6 +71,22 @@ int dlx_subset_define (Universe universe, const char *subset_name, unsigned long
 /// @post User can therefore optionally add constraints to the searched solutions.
 int dlx_subset_require_in_solution (Universe universe, const char *subset_name);
 
+/// Solution displayer signature
+/// @param [in] universe Universe
+/// @param [in] length Number of subsets in the solution
+/// @param [in] solution List of the \p length names of the subsets in the solution.
+/// @param [in] data Pointer to user defined and allocated data passed to \p dlx_displayer_set().
+typedef void (*dlx_solution_displayer) (Universe universe, unsigned long length, const char *const *solution, void *data);
+
+/// Setter of solution displayer.
+/// @param [in] universe Universe
+/// @param [in] displayer Solution displayer to set.
+/// @param [in] data Pointer to user defined and allocated data passed.
+/// @return Solution displayer set by the previous call to dlx_displayer_set() (or \p NULL on first call).
+///
+/// The function pointed to by \p displayer passed as an argument, if set, is called by dlx_exact_cover_search() every time a solution is found.
+dlx_solution_displayer dlx_displayer_set (Universe universe, dlx_solution_displayer displayer, void *data);
+
 /// Searches for all exact cover solutions.
 /// @param [in] universe Universe
 /// @param [in] one_only If set, searches for the first solution only.
@@ -110,5 +106,9 @@ unsigned long dlx_exact_cover_search (Universe universe, int one_only);
 /// @param [in] universe Universe
 /// @pre Use dlx_universe_create(const char *elements, const char *separators) or dlx_universe_create(unsigned long nb_elements, const char *elements[]) first.
 void dlx_universe_destroy (Universe universe);
+
+/// Flag to trace execution on standard error terminal (for debugging purpose only).
+/// Trace if set, keep quiet otherwise (default).
+extern int dlx_trace;
 
 #endif

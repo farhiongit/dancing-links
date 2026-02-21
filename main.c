@@ -470,9 +470,12 @@ main (void)
 {
   dlx_trace = 1;
 
-  test_sudoku ();
-
+  printf ("======= UNIT TESTS =======\n");
   various_tests ();
 
+  printf ("======= SUDOKU SOLVER =======\n");
+  test_sudoku ();
+
+  printf ("======= PENTOMINO =======\n");
   test_pentomino ();
 }

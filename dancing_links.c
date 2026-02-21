@@ -676,7 +676,7 @@ dlx_exact_cover_search (Universe universe, int one_only)
   {
     struct element *solutions[universe->head->size];
 
-    for (unsigned long i = 0; i <= universe->head->size; i++)
+    for (unsigned long i = 0; i < universe->head->size; i++)
       solutions[i] = 0;
 
     nb_solutions = dlx_universe_search (universe, solutions, 0, one_only);
