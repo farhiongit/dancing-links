@@ -53,21 +53,21 @@ Universe dlx_universe_create (unsigned long nb_elements, const char *elements[])
 ///             The caller may specify different strings in separators in successive calls that parse the same string.
 /// @return 1 if added sucessfully, 0 otherwise
 int dlx_subset_define (Universe universe, const char *subset_name, const char *list_of_some_elements, const char *separators)
-  __attribute__ ((overloadable));
+    __attribute__ ((overloadable));
 
 /// Adds a subset to the universe.
 /// @param [in] universe Universe
 /// @param [in] subset_name Name of the added subset
 /// @param [in] nb_elements Number of elements of the universe contained in the subset.
 /// @param [in] some_elements Names of elements of the universe contained in the subset.
-/// @return 1 if added sucessfully, 0 otherwise
+/// @return 1 if added successfully, 0 otherwise.
 int dlx_subset_define (Universe universe, const char *subset_name, unsigned long nb_elements, const char *some_elements[])
-  __attribute__ ((overloadable));
+    __attribute__ ((overloadable));
 
 /// Requires that a subset be included in any solution.
 /// @param [in] universe Universe
 /// @param [in] subset_name Name of the required subset
-/// @return 1 if sucessful, 0 otherwise
+/// @return 1 if successful, 0 otherwise.
 /// @post User can therefore optionally add constraints to the searched solutions.
 int dlx_subset_require_in_solution (Universe universe, const char *subset_name);
 

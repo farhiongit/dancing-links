@@ -476,6 +476,8 @@ main (void)
   printf ("======= SUDOKU SOLVER =======\n");
   test_sudoku ();
 
+  dlx_trace = 0;
+
   printf ("======= PENTOMINO =======\n");
   test_pentomino ();
 }
