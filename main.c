@@ -97,7 +97,7 @@ test_sudoku (void)
   dlx_subset_require_in_solution (sudoku, "R9C4#2");
   dlx_subset_require_in_solution (sudoku, "R9C7#6");
 
-  dlx_exact_cover_search (sudoku, 0);
+  printf ("%lu solution(s) found.\n", dlx_exact_cover_search (sudoku, 0));
 
   dlx_universe_destroy (sudoku);
 }
@@ -345,7 +345,7 @@ test_pentomino (void)
 
   dlx_displayer_set (universe, my_dlx_solution_for_pentomino, &data);
 
-  dlx_exact_cover_search (universe, 0);
+  printf ("%lu solution(s) found.\n", dlx_exact_cover_search (universe, 0));
 
   for (int c = 0; c < data.nb_candidates; c++)
     free (data.candidates[c].name);

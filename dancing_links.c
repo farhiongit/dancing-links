@@ -46,17 +46,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-// TODO:
-// - an element must be in one (check in dlx_exact_cover_search) and only one subset (check in dlx_subset_define).
-// - dlx_universe_create : do not define elements here. Elements will be the one included in subsets by dlx_subset_define.
-
 /// If set, the non-determistic choice (by \p dlx_universe_choose_element) of column is optimized heuristically.
 #define OPTIMIZE_CHOICE 1
 
 int dlx_trace = 0;
 
 /// Display to terminal standard error if \p dlx_trace is set.
-#define DLX_PRINT(...) (dlx_trace ? fprintf (stderr, __VA_ARGS__) : 0)
+#define DLX_PRINT(...) (dlx_trace ? fprintf (stderr, __VA_ARGS__) : snprintf (0, 0, __VA_ARGS__))
 
 /// Call the callback function \p dlx_displayer if set.
 #define DLX_DISPLAY_SOLUTION(universe, length, solution)                                            \
@@ -65,11 +61,11 @@ int dlx_trace = 0;
       universe->solution_displayer (universe, length, solution, universe->solution_displayer_data); \
   } while (0)
 
-/// Structure of an element (the head, an element of the universe or an element of a subset)
+/// Structure of an element (either the head or an element of the universe or an element of a subset)
 ///
 /// There are three types of elements:
 /// - The head is not a real element but the entry point to the elements of the universe. Its name is "|HEAD|".
-/// - Elements of the universz. Each element of the universe is an entry point to the elements in subsets.
+/// - Elements of the universe. Each element of the universe is an entry point to the elements in subsets.
 /// - Elements into subsets. An element is included in a subset when it is linked to an element of the universe.
 ///
 /// The head and elements of universe are doubly linked as circular lists (\p previousElement and \p nextElement).
@@ -78,18 +74,18 @@ int dlx_trace = 0;
 ///
 /// In OOP,
 /// - an abstract base class \p A would contain attributes \p previousElement and \p nextElement (of type \p A),
-/// - a class \p H would describe the head of a universe and would inherite from the base class \p A extended with an attribute \p size,
+/// - a class \p H would describe the head of a universe and would inherit from the base class \p A extended with an attribute \p size,
 ///   the total number of subsets.
-/// - an abstract base class \p B would inherite from class \p A extended with attributes
+/// - an abstract base class \p B would inherit from class \p A extended with attributes
 ///   \p elementInPreviousSubsetContainingThisElementOfUnivers and \p elementInNextSubsetContainingThisElementOfUnivers (of type B).
-/// - a class \p U would describe elements of the universe, inherite from class \p B extended with attributes \p size,
+/// - a class \p U would describe elements of the universe, inherit from class \p B extended with attributes \p size,
 ///   the number of subsets containing this element, and \p name, the name of the element
-/// - a class \p S would describe elements part of subsets, inherite from class \p B extended with attributes \p elementInUnivers
+/// - a class \p S would describe elements part of subsets, inherit from class \p B extended with attributes \p elementInUnivers
 ///   (of type \p U), the element of the universe included in the subset and \p name, the name of the subset containing this element.
 ///
 /// In C, all attributes are gathered into a common structure and unnecessary attributes are left undefined.
 struct element {
-  char *name;             ///< Name of the head ("|HEAD|"), of the element of the universe, or of the subset containing the element of a subset.
+  char *name;             ///< Either the name of the head ("|HEAD|"), or of the element of the universe, or of the subset containing the element of a subset.
   unsigned long int size; ///< Number of subsets (for head) or of subsets containing an element of the universe. Left undefined for elements of subsets.
 
   struct element *previousElement;                                        ///< Link to the previous element in universe or in the subset.
