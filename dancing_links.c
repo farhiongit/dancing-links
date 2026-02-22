@@ -554,7 +554,7 @@ dlx_subset_require_in_solution (Universe universe, const char *subset_name) {
   if (!universe || !subset_name)
     return 0;
 
-  DLX_PRINT ("Subset required in any solution:\n");
+  DLX_PRINT ("Subset required in solution:\n");
   DLX_PRINT ("  [%lu]\tSubset %s:", universe->solution_length - universe->head->size + 1, subset_name);
 
   // In case of several candidate subsets (with the same name), a subset is chosen arbitrarily

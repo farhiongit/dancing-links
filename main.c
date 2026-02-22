@@ -1,7 +1,9 @@
+#undef NDEBUG
+#include "dancing_links.h"
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "dancing_links.h"
 
 static void
 test_sudoku (void)
@@ -15,8 +17,7 @@ test_sudoku (void)
   char inBox[] = "B?#?";
 
   // 324 columns
-  char columns[strlen (inCell) * 81 + 81 + strlen (inRow) * 81 + 81 +
-               strlen (inColumn) * 81 + 81 + strlen (inBox) * 81 + 81 + 1];
+  char columns[strlen (inCell) * 81 + 81 + strlen (inRow) * 81 + 81 + strlen (inColumn) * 81 + 81 + strlen (inBox) * 81 + 81 + 1];
   *columns = 0;
   for (int i = 1; i <= 9; i++)
     for (int j = 1; j <= 9; j++)
@@ -157,8 +158,7 @@ my_dlx_solution_for_pentomino (Universe universe, unsigned long length, const ch
   for (unsigned long pento = 0; pento < length; pento++)
     for (int candidate = 0; candidate < data->nb_candidates; candidate++)
       if (!strcmp (solution[pento], data->candidates[candidate].name))
-        for (size_t tile = 0;
-             tile < sizeof (data->candidates[candidate].tile) / sizeof (*data->candidates[candidate].tile); tile++)
+        for (size_t tile = 0; tile < sizeof (data->candidates[candidate].tile) / sizeof (*data->candidates[candidate].tile); tile++)
           for (int cell = 0; cell < data->grid_size; cell++)
             if (!strcmp (data->candidates[candidate].tile[tile].cell_name, data->grid[cell].name))
               board[data->grid[cell].coord.x][data->grid[cell].coord.y] = data->candidates[candidate].pentomino_name;
@@ -357,11 +357,14 @@ test_pentomino (void)
 static void
 my_dlx_solution_displayer (Universe universe, unsigned long length, const char *const *solution, void *data)
 {
+  (void) universe;
   (void) data;
-  printf ("\n---\nUnivers %p\nSolution: %lu elements\n", (void *) universe, length);
+  if (!length)
+    return;
+  printf ("--\n");
   for (unsigned long i = 0; i < length; i++)
     printf ("'%s' ; ", solution[i]);
-  printf ("\n---\n");
+  printf ("(%lu subsets)\n---\n", length);
 }
 
 static void
@@ -369,99 +372,66 @@ various_tests (void)
 {
   //Test 2
   Universe m = dlx_universe_create ("A;B;C;D;E;F;G", ";");
-
   // Set solution displayer.
   dlx_displayer_set (m, my_dlx_solution_displayer, 0);
-
   dlx_subset_define (m, "L1", "C;E;F", ";");
   dlx_subset_define (m, "L2", "A;D;G", ";");
+  assert (dlx_exact_cover_search (m, 0) == 0);  // The universe is not fully covered by subsets.
   dlx_subset_define (m, "L3", "B;C;F", ";");
   dlx_subset_define (m, "L4", "A;D", ";");
   dlx_subset_define (m, "L5", "B;G", ";");
   dlx_subset_define (m, "L6", "D;E;G", ";");
-
   dlx_subset_define (m, "L7", "A;B;C;D;E;F", ";");
   dlx_subset_define (m, "Lg", "G", ";");
   dlx_subset_define (m, "Le", "E", ";");
-
-  dlx_exact_cover_search (m, 0);
-
+  assert (dlx_exact_cover_search (m, 0) == 4);
+  assert (dlx_exact_cover_search (m, 0) == 4);  // Can be rerun.
   // Unset solution displayer.
   dlx_displayer_set (m, 0, 0);
-
   dlx_universe_destroy (m);
-
   //Test 3
   m = dlx_universe_create ("A;A;B;A", ";");
-
   dlx_subset_define (m, "L", "", ";");
   dlx_subset_define (m, "L", "A", ";");
   dlx_subset_define (m, "", "B", ";");
-  dlx_subset_define (m, "L", "A;B", ";");
-
-  dlx_exact_cover_search (m, 0);
-
+  dlx_subset_define (m, "L", "A;B", ";");       // Another subset (with the same name, not recommended.)
+  assert (dlx_exact_cover_search (m, 0) == 2);
   dlx_universe_destroy (m);
-
   //Test 4
   m = dlx_universe_create ("A;B", ";");
-
   dlx_subset_define (m, "La", "A", ";");
-
-  dlx_exact_cover_search (m, 0);
-
+  assert (dlx_exact_cover_search (m, 0) == 0);  // The universe is not fully covered by subsets.
   dlx_universe_destroy (m);
-
-  //Test 4nis
+  //Test 4bis
   m = dlx_universe_create ("A;B", ";");
-
   dlx_subset_define (m, "La", "A", ";");
-
   dlx_subset_require_in_solution (m, "La");
-
-  dlx_exact_cover_search (m, 0);
-
+  assert (dlx_exact_cover_search (m, 0) == 0);  // The universe is not fully covered by subsets.
   dlx_universe_destroy (m);
-
   //Test 5
   m = dlx_universe_create ("A;B", ";");
-
   dlx_subset_define (m, "La", "A", ";");
   dlx_subset_define (m, "Lb", "B", ";");
-
   dlx_subset_require_in_solution (m, "La");
   dlx_subset_require_in_solution (m, "Lb");
-
-  dlx_exact_cover_search (m, 0);
-
+  assert (dlx_exact_cover_search (m, 0) == 1);
   dlx_universe_destroy (m);
-
   //Test 6
   m = dlx_universe_create ("A;B", ";");
-
   dlx_subset_define (m, "La", "A;A;H", ";");
   dlx_subset_define (m, "Lb", "B", ";");
   dlx_subset_define (m, "L", "A;B;A", ";");
-
   dlx_subset_require_in_solution (m, "La");
-  dlx_subset_require_in_solution (m, "Lb");
-
-  dlx_exact_cover_search (m, 0);
-
+  assert (dlx_exact_cover_search (m, 0) == 1);  // Only the require solution is found.
   dlx_universe_destroy (m);
-
   //Test 7
   m = dlx_universe_create ("A;B", ";");
-
   dlx_subset_define (m, "La", "A", ";");
   dlx_subset_define (m, "Lb", "B", ";");
   dlx_subset_define (m, "L", "A;B", ";");
-
   dlx_subset_require_in_solution (m, "La");
-  dlx_subset_require_in_solution (m, "L");
-
-  dlx_exact_cover_search (m, 0);
-
+  dlx_subset_require_in_solution (m, "L");      // Incompatible subset with previous required sunset, ignored.
+  assert (dlx_exact_cover_search (m, 0) == 1);
   dlx_universe_destroy (m);
 }
 
@@ -469,15 +439,11 @@ int
 main (void)
 {
   dlx_trace = 1;
-
   printf ("======= UNIT TESTS =======\n");
   various_tests ();
-
   printf ("======= SUDOKU SOLVER =======\n");
   test_sudoku ();
-
   dlx_trace = 0;
-
   printf ("======= PENTOMINO =======\n");
   test_pentomino ();
 }
