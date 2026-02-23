@@ -28,7 +28,14 @@
 /// Objet Universe
 typedef struct universe *Universe;
 
-/// Initializes a new universe.
+/// Initialises a new unbound universe.
+/// @return universe
+/// @note The extension of the universe will match its subsets later added by dlx_subset_define(Universe universe, const char *subset_name, const char *list_of_some_elements, const char *separators)
+///       or dlx_subset_define(Universe universe, const char *subset_name, unsigned long nb_elements, const char *some_elements[]).
+/// @post User must call dlx_universe_destroy(Universe universe) later.
+Universe dlx_universe_create (void) __attribute__ ((overloadable));
+
+/// Initialises a new bound universe.
 /// @param [in] list_of_elements List of elements of the universe, separated by separators.
 /// @param [in] separators List of accepted separators, terminated by \0.
 ///             The separators argument specifies a set of bytes that delimit the tokens in the parsed string.
@@ -37,7 +44,7 @@ typedef struct universe *Universe;
 /// @post User must call dlx_universe_destroy(Universe universe) later.
 Universe dlx_universe_create (const char *list_of_elements, const char *separators) __attribute__ ((overloadable));
 
-/// Initializes a new universe.
+/// Initialises a new bound universe.
 /// @param [in] nb_elements Number of elements of the universe.
 /// @param [in] elements Names of element of the universe.
 /// @return universe

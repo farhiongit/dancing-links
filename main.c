@@ -16,34 +16,7 @@ test_sudoku (void)
   char inColumn[] = "C?#?";
   char inBox[] = "B?#?";
 
-  // 324 columns
-  char columns[strlen (inCell) * 81 + 81 + strlen (inRow) * 81 + 81 + strlen (inColumn) * 81 + 81 + strlen (inBox) * 81 + 81 + 1];
-  *columns = 0;
-  for (int i = 1; i <= 9; i++)
-    for (int j = 1; j <= 9; j++)
-    {
-      inCell[1] = '0' + i;
-      inCell[3] = '0' + j;
-      strcat (columns, inCell);
-      strcat (columns, "|");
-
-      inRow[1] = '0' + i;
-      inRow[3] = '0' + j;
-      strcat (columns, inRow);
-      strcat (columns, "|");
-
-      inColumn[1] = '0' + i;
-      inColumn[3] = '0' + j;
-      strcat (columns, inColumn);
-      strcat (columns, "|");
-
-      inBox[1] = '0' + i;
-      inBox[3] = '0' + j;
-      strcat (columns, inBox);
-      strcat (columns, "|");
-    }
-
-  Universe sudoku = dlx_universe_create (columns, "|");
+  Universe sudoku = dlx_universe_create ();
 
   char line[strlen (inCell) + 1 + strlen (inRow) + 1 + strlen (inColumn) + 1 + strlen (inBox) + 1];
 
@@ -432,6 +405,18 @@ various_tests (void)
   dlx_subset_require_in_solution (m, "La");
   dlx_subset_require_in_solution (m, "L");      // Incompatible subset with previous required sunset, ignored.
   assert (dlx_exact_cover_search (m, 0) == 1);
+  dlx_universe_destroy (m);
+  //Test 8
+  m = dlx_universe_create ();  // Unbound universe.
+  dlx_universe_destroy (m);
+  m = dlx_universe_create ();  // Unbound universe.
+  assert (dlx_exact_cover_search (m, 0) == 1);  // Empty universe.
+  dlx_subset_define (m, "La", "A", ";");
+  assert (dlx_exact_cover_search (m, 0) == 1);  // The universe now contains one element: A
+  dlx_subset_define (m, "L", "A;B", ";");
+  assert (dlx_exact_cover_search (m, 0) == 1);  // The universe now contains two elements: A and B
+  dlx_subset_define (m, "Lb", "B", ";");
+  assert (dlx_exact_cover_search (m, 0) == 2);
   dlx_universe_destroy (m);
 }
 

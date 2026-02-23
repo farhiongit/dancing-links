@@ -1,4 +1,3 @@
-
 /** @mainpage Exact cover search using dancing links Knuth's algorithm
  *
  * Dancing links, Donald E. Knuth, Submitted on 15 Nov 2000 (see  http://en.wikipedia.org/wiki/Dancing_Links,
@@ -111,6 +110,8 @@ struct universe {
   dlx_solution_displayer solution_displayer; ///< Callback function to display a solution
 
   void *solution_displayer_data; ///< Data usable for callback function to display a solution
+
+  int unbound; ///< The universe boundaries expand to the boundaries of its subsets.
 };
 
 /// Gets an element by its name.
@@ -150,11 +151,10 @@ dlx_head_add_element (struct element *head, const char *name) {
   element->nextElement = head;
   element->previousElement = head->previousElement;
 
-  // Other unused components of element are left undefined.
-
   head->previousElement->nextElement = element;
   head->previousElement = element;
 
+  // Other unused components of element are left undefined.
   return 1;
 }
 
@@ -182,10 +182,10 @@ dlx_head_choose_element (struct element *head) {
 }
 
 /// Removes an element and all the elements of subsets which contain this element.
-/// @param [in] elementInUnivers Element to be removed.
+/// @param [in] elementInUniverse Element to be removed.
 /// @post User must call dlx_element_uncover(struct element *elementInUnivers) later.
 ///
-/// We remove the element from the universe.
+/// Removes the element from the universe.
 /// The elements in subsets that contains this element are also removed from the universe.
 static void
 dlx_element_cover (struct element *elementInUniverse) {
@@ -202,7 +202,7 @@ dlx_element_cover (struct element *elementInUniverse) {
 }
 
 /// Restores an element and all the elements of subsets which contain this element.
-/// @param [in] elementInUnivers Element to be restored.
+/// @param [in] elementInUniverse Element to be restored.
 /// @pre Use dlx_element_cover(struct element *elementInUnivers) first.
 static void
 dlx_element_uncover (struct element *elementInUniverse) {
@@ -339,12 +339,8 @@ dlx_displayer_set (Universe universe, dlx_solution_displayer msd, void *data) {
 }
 
 Universe
-dlx_universe_create (unsigned long nb_elements, const char *elements[]) __attribute__ ((overloadable)) {
-  if (!nb_elements || !elements)
-    return 0;
-
+dlx_universe_create (void) __attribute__ ((overloadable)) {
   Universe universe = malloc (sizeof (*universe));
-
   universe->head = malloc (sizeof (*universe->head));
 
   universe->head->previousElement = universe->head->nextElement = universe->head;
@@ -358,6 +354,19 @@ dlx_universe_create (unsigned long nb_elements, const char *elements[]) __attrib
   universe->uncover_column_length = 0;
   universe->solution_displayer = 0;
   universe->solution_displayer_data = 0;
+  universe->unbound = 1; // Unboud universe.
+
+  return universe;
+}
+
+Universe
+dlx_universe_create (unsigned long nb_elements, const char *elements[]) __attribute__ ((overloadable)) {
+  if (!nb_elements || !elements)
+    return 0;
+
+  /// @overload
+  Universe universe = dlx_universe_create ();
+  universe->unbound = 0; // Bound universe.
 
   DLX_PRINT ("Elements in universe:");
   int redo = 0;
@@ -437,10 +446,15 @@ dlx_subset_define (Universe universe, const char *subset_name, unsigned long nb_
     DLX_PRINT (" %s", elements[i]);
     struct element *elementInUniverse = 0;
 
-    if (!(elementInUniverse = dlx_head_get_element_by_name (universe->head, elements[i]))) {
-      DLX_PRINT (" (unknown element)");
-      redo = 1;
-      continue;
+    if (!universe->unbound) {
+      if (!(elementInUniverse = dlx_head_get_element_by_name (universe->head, elements[i]))) {
+        DLX_PRINT (" (unknown element)");
+        redo = 1;
+        continue;
+      }
+    } else { // if (universe->unbound)
+      dlx_head_add_element (universe->head, elements[i]);
+      elementInUniverse = dlx_head_get_element_by_name (universe->head, elements[i]);
     }
 
     struct element *elementInSubset = 0;
@@ -622,12 +636,9 @@ dlx_exact_cover_search (Universe universe, int one_only) {
   unsigned long nb_solutions = 0;
 
   if (universe->head->size) {
-    struct element *solutions[universe->head->size];
-
-    for (unsigned long i = 0; i < universe->head->size; i++)
-      solutions[i] = 0;
-
+    struct element **solutions = calloc (universe->head->size, sizeof (*solutions));
     nb_solutions = dlx_universe_search (universe, solutions, 0, one_only);
+    free (solutions);
   } else
     nb_solutions = dlx_universe_search (universe, 0, 0, one_only);
 
