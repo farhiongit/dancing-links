@@ -39,7 +39,9 @@
  * Exact cover search implementation.
  */
 
+#undef NDEBUG
 #include "dancing_links.h"
+#include <assert.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -140,8 +142,8 @@ dlx_head_add_element (struct element *head, const char *name) {
 
   /// Initializes the element in the universe.
   struct element *element = malloc (sizeof (*element));
-
-  element->name = strdup (name);
+  assert (element);
+  assert ((element->name = strdup (name)));
 
   element->size = 0;
 
@@ -245,7 +247,7 @@ dlx_universe_display_solutions (Universe universe, struct element **solutions) {
 
       DLX_PRINT ("\n");
 
-      universe->solution[universe->solution_length - universe->head->size + k] = strdup (solutions[k]->name);
+      assert ((universe->solution[universe->solution_length - universe->head->size + k] = strdup (solutions[k]->name)));
       length++;
     }
   }
@@ -341,7 +343,8 @@ dlx_displayer_set (Universe universe, dlx_solution_displayer msd, void *data) {
 Universe
 dlx_universe_create (void) __attribute__ ((overloadable)) {
   Universe universe = malloc (sizeof (*universe));
-  universe->head = malloc (sizeof (*universe->head));
+  assert (universe);
+  assert ((universe->head = malloc (sizeof (*universe->head))));
 
   universe->head->previousElement = universe->head->nextElement = universe->head;
   universe->head->size = 0;
@@ -403,7 +406,7 @@ dlx_universe_create (const char *elements, const char *separators) __attribute__
   char *saveptr;
   unsigned long nb_cols;
 
-  sccpy = strdup (elements);
+  assert ((sccpy = strdup (elements)));
   nb_cols = 0;
   for (char *c = sccpy; strtok_r (c, separators, &saveptr); c = 0)
     nb_cols++;
@@ -415,7 +418,7 @@ dlx_universe_create (const char *elements, const char *separators) __attribute__
   const char *cols[nb_cols];
   char *colname;
 
-  sccpy = strdup (elements);
+  assert ((sccpy = strdup (elements)));
   nb_cols = 0;
   for (char *c = sccpy; (colname = strtok_r (c, separators, &saveptr)); c = 0)
     cols[nb_cols++] = colname;
@@ -478,9 +481,9 @@ dlx_subset_define (Universe universe, const char *subset_name, unsigned long nb_
     }
 
     // Add element in subset
-    elementInSubset = malloc (sizeof (*elementInSubset));
+    assert ((elementInSubset = malloc (sizeof (*elementInSubset))));
 
-    elementInSubset->name = strdup (subset_name);
+    assert ((elementInSubset->name = strdup (subset_name)));
     elementInSubset->elementInUniverse = elementInUniverse;
     elementInUniverse->size++; // Number of subsets containing the element is incremented
 
@@ -507,7 +510,7 @@ dlx_subset_define (Universe universe, const char *subset_name, unsigned long nb_
     universe->head->size++; // Number of subsets
 
     universe->solution_length++;
-    universe->solution = realloc (universe->solution, universe->solution_length * sizeof (*universe->solution));
+    assert ((universe->solution = realloc (universe->solution, universe->solution_length * sizeof (*universe->solution))));
     universe->solution[universe->solution_length - 1] = 0;
 
     if (redo) {
@@ -538,7 +541,7 @@ dlx_subset_define (Universe universe, const char *subset_name, const char *some_
   char *saveptr;
   unsigned long nb_cols;
 
-  sccpy = strdup (some_elements);
+  assert ((sccpy = strdup (some_elements)));
   nb_cols = 0;
   for (char *c = sccpy; strtok_r (c, separators, &saveptr); c = 0)
     nb_cols++;
@@ -550,7 +553,7 @@ dlx_subset_define (Universe universe, const char *subset_name, const char *some_
   const char *cols[nb_cols];
   char *colname;
 
-  sccpy = strdup (some_elements);
+  assert ((sccpy = strdup (some_elements)));
   nb_cols = 0;
   for (char *c = sccpy; (colname = strtok_r (c, separators, &saveptr)); c = 0)
     cols[nb_cols++] = colname;
@@ -604,7 +607,7 @@ dlx_subset_require_in_solution (Universe universe, const char *subset_name) {
 
           // Keep a reference to the uncovered element for further access in dlx_universe_destroy.
           universe->uncover_column_length++;
-          universe->uncover_column = realloc (universe->uncover_column, universe->uncover_column_length * sizeof (*universe->uncover_column));
+          assert ((universe->uncover_column = realloc (universe->uncover_column, universe->uncover_column_length * sizeof (*universe->uncover_column))));
           universe->uncover_column[universe->uncover_column_length - 1] = j->elementInUniverse;
 
           j = j->nextElement;
@@ -612,7 +615,7 @@ dlx_subset_require_in_solution (Universe universe, const char *subset_name) {
 
         DLX_PRINT ("\n");
 
-        universe->solution[universe->solution_length - universe->head->size] = strdup (subset_name);
+        assert ((universe->solution[universe->solution_length - universe->head->size] = strdup (subset_name)));
         universe->head->size--;
 
         // break loops and return.
@@ -637,6 +640,7 @@ dlx_exact_cover_search (Universe universe, int one_only) {
 
   if (universe->head->size) {
     struct element **solutions = calloc (universe->head->size, sizeof (*solutions));
+    assert (solutions);
     nb_solutions = dlx_universe_search (universe, solutions, 0, one_only);
     free (solutions);
   } else
